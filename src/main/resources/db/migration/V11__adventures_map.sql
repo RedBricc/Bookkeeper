@@ -1,0 +1,1 @@
+alter table adventure add column map text not null default '';

@@ -1,0 +1,1 @@
+alter table adventure add constraint unique_slug unique (slug);

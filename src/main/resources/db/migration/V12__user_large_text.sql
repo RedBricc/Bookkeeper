@@ -1,0 +1,1 @@
+alter table vallterra_user add column prefers_large boolean not null default false;

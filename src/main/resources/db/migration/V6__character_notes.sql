@@ -1,0 +1,1 @@
+alter table character add column notes text not null default '';

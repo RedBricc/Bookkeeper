@@ -1,0 +1,1 @@
+alter table character add column xp integer not null default 0;

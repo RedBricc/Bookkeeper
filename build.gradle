@@ -1,0 +1,119 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.flywaydb:flyway-database-postgresql:11.1.0'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.vaadin' version '24.7.0'
+    id 'org.flywaydb.flyway' version '11.1.0'
+    id 'org.jooq.jooq-codegen-gradle' version '3.19.21'
+}
+
+group = 'vallterra'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('vaadinVersion', "24.7.0")
+}
+
+dependencies {
+    implementation 'com.vaadin:vaadin-spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.flywaydb:flyway-core'
+    implementation("org.springframework.boot:spring-boot-starter-jooq:3.4.4")
+    implementation 'org.jooq.jooq-codegen-gradle:org.jooq.jooq-codegen-gradle.gradle.plugin:3.19.21'
+
+    compileOnly 'org.projectlombok:lombok'
+
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly("org.flywaydb:flyway-database-postgresql:11.1.0")
+
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    jooqCodegen 'org.postgresql:postgresql:42.7.4'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.vaadin:vaadin-bom:${vaadinVersion}"
+    }
+}
+
+jooq {
+    configuration {
+        jdbc {
+            driver = 'org.postgresql.Driver'
+            url = 'jdbc:postgresql://127.0.0.1:4321/bookkeeper_gen'
+            user = 'bookkeeper'
+            password = 'admin'
+        }
+        generator {
+            database {
+                forcedTypes {
+                    forcedType {
+                        userType = 'com.fasterxml.jackson.databind.JsonNode'
+                        binding = 'longo.db.binding.JsonBinding'
+                        includeExpression = '.*jsonb'
+                    }
+                }
+            }
+            generate {
+                javaTimeTypes = true
+                pojos = true
+                fluentSetters = true
+                daos = true
+                validationAnnotations = true
+                udts = true
+                embeddables = true
+            }
+        }
+    }
+}
+
+flyway {
+    url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://localhost:4321/bookkeeper_gen'
+    user = 'bookkeeper'
+    password = 'admin'
+    driver = 'org.postgresql.Driver'
+    cleanDisabled = false
+}
+
+jooqCodegen.dependsOn flywayClean, flywayMigrate
+
+compileJava {
+    dependsOn jooqCodegen
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

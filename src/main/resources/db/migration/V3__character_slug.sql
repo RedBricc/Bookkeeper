@@ -1,0 +1,1 @@
+alter table character add column slug text default null;

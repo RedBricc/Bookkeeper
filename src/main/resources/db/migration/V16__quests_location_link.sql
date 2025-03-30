@@ -1,0 +1,1 @@
+alter table quest add column location_link text not null default '';

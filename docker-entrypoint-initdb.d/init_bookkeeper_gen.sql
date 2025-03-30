@@ -1,0 +1,1 @@
+create database bookkeeper_gen with owner = bookkeeper;

@@ -1,0 +1,1 @@
+alter table character_adventure add column in_party boolean not null default true;
