@@ -1,11 +1,13 @@
 package vallterra.bookkeeper.ui;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
 @Theme(variant = Lumo.DARK)
+@CssImport("./styles/shared-styles.css")
 public class AppShell implements AppShellConfigurator {
 
     @Override

@@ -1,4 +1,4 @@
-package vallterra.bookkeeper.ui;
+package vallterra.bookkeeper.ui.view;
 
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.login.LoginForm;
