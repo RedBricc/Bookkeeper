@@ -1,7 +1,7 @@
 package vallterra.bookkeeper.backend.user;
 
 import jakarta.validation.constraints.NotNull;
-import org.jooq.generated.public_.tables.pojos.BookkeeperUser;
+import org.jooq.generated.tables.pojos.BookkeeperUser;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;

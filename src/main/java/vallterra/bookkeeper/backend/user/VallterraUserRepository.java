@@ -1,7 +1,7 @@
 package vallterra.bookkeeper.backend.user;
 
 import jakarta.validation.constraints.NotNull;
-import org.jooq.generated.public_.tables.pojos.VallterraUser;
+import org.jooq.generated.tables.pojos.VallterraUser;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
@@ -18,7 +18,9 @@ import java.util.Optional;
 public interface VallterraUserRepository {
 
     VallterraUser getById(@NotNull Integer vallterraUserId);
+
     VallterraUser save(@NotNull VallterraUser user);
+
     Optional<VallterraUser> findById(@NotNull Integer vallterraUserId);
 
 }

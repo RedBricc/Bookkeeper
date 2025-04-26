@@ -1,6 +1,6 @@
 package vallterra.bookkeeper.backend.user;
 
-import org.jooq.generated.public_.tables.pojos.Character;
+import org.jooq.generated.tables.pojos.Character;
 import org.springframework.validation.annotation.Validated;
 
 /**

@@ -7,7 +7,7 @@ import vallterra.bookkeeper.backend.role.BookkeeperUserRoleRepository;
 
 import java.util.List;
 
-import static org.jooq.generated.public_.tables.BookkeeperUserRole.BOOKKEEPER_USER_ROLE;
+import static org.jooq.generated.tables.BookkeeperUserRole.BOOKKEEPER_USER_ROLE;
 
 @Repository
 @RequiredArgsConstructor

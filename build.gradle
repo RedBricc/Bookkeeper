@@ -42,13 +42,13 @@ ext {
 dependencies {
     implementation 'com.vaadin:vaadin-spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.flywaydb:flyway-core'
     implementation("org.springframework.boot:spring-boot-starter-jooq:3.4.4")
     implementation 'org.jooq.jooq-codegen-gradle:org.jooq.jooq-codegen-gradle.gradle.plugin:3.19.21'
 
     compileOnly 'org.projectlombok:lombok'
 
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
     runtimeOnly 'org.postgresql:postgresql'
@@ -58,6 +58,9 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:junit-jupiter'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -74,17 +77,15 @@ jooq {
     configuration {
         jdbc {
             driver = 'org.postgresql.Driver'
-            url = 'jdbc:postgresql://127.0.0.1:4321/bookkeeper_gen'
+            url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://host.docker.internal:4321/bookkeeper_gen'
             user = 'bookkeeper'
             password = 'admin'
         }
         generator {
             database {
-                forcedTypes {
-                    forcedType {
-                        userType = 'com.fasterxml.jackson.databind.JsonNode'
-                        binding = 'longo.db.binding.JsonBinding'
-                        includeExpression = '.*jsonb'
+                schemata {
+                    schema {
+                        inputSchema = 'public'
                     }
                 }
             }
@@ -102,7 +103,7 @@ jooq {
 }
 
 flyway {
-    url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://localhost:4321/bookkeeper_gen'
+    url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://host.docker.internal:4321/bookkeeper_gen'
     user = 'bookkeeper'
     password = 'admin'
     driver = 'org.postgresql.Driver'
@@ -110,6 +111,8 @@ flyway {
 }
 
 jooqCodegen.dependsOn flywayClean, flywayMigrate
+compileJava.dependsOn jooqCodegen
+bootJar.dependsOn vaadinBuildFrontend
 
 tasks.named('test') {
     useJUnitPlatform()

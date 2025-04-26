@@ -1,7 +1,7 @@
 package vallterra.bookkeeper.backend.role;
 
 import jakarta.validation.constraints.NotNull;
-import org.jooq.generated.public_.tables.pojos.BookkeeperUser;
+import org.jooq.generated.tables.pojos.BookkeeperUser;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

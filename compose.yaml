@@ -1,11 +1,62 @@
+volumes:
+  pgdata:
+  gradle-cache:
 services:
   postgres:
-    image: 'postgres:17'
+    image: postgres:17
     environment:
-      - 'POSTGRES_DB=dev_db'
-      - 'POSTGRES_PASSWORD=admin'
-      - 'POSTGRES_USER=bookkeeper'
+      POSTGRES_DB: bookkeeper
+      POSTGRES_USER: bookkeeper
+      POSTGRES_PASSWORD: admin
     ports:
-      - '4321:5432'
+      - "4321:5432"
     volumes:
-      - ./init_bookkeeper_gen.sql:/docker-entrypoint-initdb.d/init_bookkeeper_gen.sql:Z
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d:ro,Z
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U bookkeeper" ]
+      interval: 5s
+      retries: 5
+  tests:
+    image: gradle:8-jdk21
+    working_dir: /workspace
+    command: gradle clean test --no-daemon
+    volumes:
+      - .:/workspace
+      - gradle-cache:/home/gradle/.gradle
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TESTCONTAINERS_RYUK_DISABLED: "true"
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+  bookkeeper:
+    build:
+      context: .
+      target: runtime
+    depends_on:
+      tests:
+        condition: service_completed_successfully
+    ports:
+      - "9696:9696"
+    networks: [ web ]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9696/actuator/health" ]
+      interval: 15s
+      retries: 3
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    depends_on:
+      bookkeeper:
+        condition: service_healthy
+    ports: [ "80:80", "443:443" ]
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    networks: [ web ]
+    restart: unless-stopped
+networks:
+  web:
+    driver: bridge

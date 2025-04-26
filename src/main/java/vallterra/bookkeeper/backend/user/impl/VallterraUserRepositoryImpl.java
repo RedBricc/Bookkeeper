@@ -2,13 +2,13 @@ package vallterra.bookkeeper.backend.user.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
-import org.jooq.generated.public_.tables.pojos.VallterraUser;
+import org.jooq.generated.tables.pojos.VallterraUser;
 import org.springframework.stereotype.Repository;
 import vallterra.bookkeeper.backend.user.VallterraUserRepository;
 
 import java.util.Optional;
 
-import static org.jooq.generated.public_.Tables.VALLTERRA_USER;
+import static org.jooq.generated.Tables.VALLTERRA_USER;
 
 @Repository
 @RequiredArgsConstructor
