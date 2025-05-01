@@ -1,15 +1,15 @@
 package vallterra.bookkeeper.ui;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import org.springframework.security.core.userdetails.UserDetails;
 import vallterra.bookkeeper.ui.view.*;
@@ -27,9 +27,9 @@ public class MainLayout extends AppLayout {
 
     private void buildNavbar() {
         var bookIcon = VaadinIcon.BOOK.create();
-        bookIcon.getStyle().setFontSize("1.5rem");
+        bookIcon.getStyle().setFontSize("1.25rem");
 
-        var titleContainer = new HorizontalLayout(bookIcon, new H1("Bookkeeper"));
+        var titleContainer = new HorizontalLayout(bookIcon, new H2("Bookkeeper"));
         titleContainer.setPadding(true);
         titleContainer.setAlignItems(FlexComponent.Alignment.CENTER);
 
@@ -43,14 +43,14 @@ public class MainLayout extends AppLayout {
         drawerContainer.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         drawerContainer.setSizeFull();
 
-        var pages = new VerticalLayout();
-        pages.addClassName("container-large");
+        var pages = new SideNav();
 
-        pages.add(createMenuLink(HomeView.class, "Home", VaadinIcon.HOME));
-        pages.add(createMenuLink(QuestsView.class, "Quests", VaadinIcon.ABACUS));
-        pages.add(createMenuLink(CharactersView.class, "Characters", VaadinIcon.USERS));
-        pages.add(createMenuLink(DmToolsView.class, "DM Tools", VaadinIcon.TOOLS));
-        pages.add(createMenuLink(NotesView.class, "Notes", VaadinIcon.PENCIL));
+        pages.addItem(new SideNavItem("Home", HomeView.class, VaadinIcon.HOME.create()));
+        pages.addItem(new SideNavItem("Quests", QuestsView.class, VaadinIcon.ABACUS.create()));
+        pages.addItem(new SideNavItem("Adventures", AdventuresView.class, VaadinIcon.ROAD.create()));
+        pages.addItem(new SideNavItem("Characters", CharactersView.class, VaadinIcon.USERS.create()));
+        pages.addItem(new SideNavItem("DM Tools", DmToolsView.class, VaadinIcon.TOOLS.create()));
+        pages.addItem(new SideNavItem("Notes", NotesView.class, VaadinIcon.PENCIL.create()));
 
         drawerContainer.add(pages);
 
@@ -62,15 +62,5 @@ public class MainLayout extends AppLayout {
         }
 
         addToDrawer(drawerContainer);
-    }
-
-    private RouterLink createMenuLink(Class<? extends Component> viewClass, String caption, VaadinIcon icon) {
-        var routerLink = new RouterLink(viewClass);
-
-        routerLink.setClassName("menu-link");
-        routerLink.add(icon.create());
-        routerLink.add(new Span(caption));
-
-        return routerLink;
     }
 }

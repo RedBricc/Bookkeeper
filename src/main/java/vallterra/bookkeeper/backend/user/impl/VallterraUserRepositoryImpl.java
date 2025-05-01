@@ -6,6 +6,7 @@ import org.jooq.generated.tables.pojos.VallterraUser;
 import org.springframework.stereotype.Repository;
 import vallterra.bookkeeper.backend.user.VallterraUserRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.jooq.generated.Tables.VALLTERRA_USER;
@@ -35,5 +36,11 @@ public class VallterraUserRepositoryImpl implements VallterraUserRepository {
         return db.selectFrom(VALLTERRA_USER)
                 .where(VALLTERRA_USER.ID.eq(vallterraUserId))
                 .fetchOptionalInto(VallterraUser.class);
+    }
+
+    @Override
+    public List<VallterraUser> findAll() {
+        return db.selectFrom(VALLTERRA_USER)
+                .fetchInto(VallterraUser.class);
     }
 }

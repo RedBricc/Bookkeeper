@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import org.jooq.generated.tables.pojos.VallterraUser;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,5 +23,12 @@ public interface VallterraUserRepository {
     VallterraUser save(@NotNull VallterraUser user);
 
     Optional<VallterraUser> findById(@NotNull Integer vallterraUserId);
+
+    /**
+     * Find all Vallterra users.
+     *
+     * @return a list of all Vallterra users
+     */
+    List<VallterraUser> findAll();
 
 }
