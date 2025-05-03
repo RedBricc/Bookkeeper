@@ -1,6 +1,12 @@
 volumes:
   pgdata:
   gradle-cache:
+  node-cache:
+
+networks:
+  web:
+    driver: bridge
+
 services:
   postgres:
     image: postgres:17
@@ -8,8 +14,7 @@ services:
       POSTGRES_DB: bookkeeper
       POSTGRES_USER: bookkeeper
       POSTGRES_PASSWORD: admin
-    ports:
-      - "4321:5432"
+    ports: [ "4321:5432" ]
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d:ro,Z
@@ -18,11 +23,15 @@ services:
       interval: 5s
       retries: 5
   tests:
-    image: gradle:8-jdk21
+    image: gradle:8-jdk24
     working_dir: /workspace
-    command: gradle clean test --no-daemon
+    command: >
+      gradle clean jooqCodegen flywayMigrate test bootJar
+      -Dgen.db.url=jdbc:postgresql://host.docker.internal:4321/bookkeeper_gen
+      --no-daemon --stacktrace
     volumes:
       - .:/workspace
+      - node-cache:/home/gradle/.npm
       - gradle-cache:/home/gradle/.gradle
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -31,19 +40,23 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 4G
   bookkeeper:
     build:
       context: .
-      target: runtime
+      dockerfile: Dockerfile
     depends_on:
       tests:
         condition: service_completed_successfully
-    ports:
-      - "9696:9696"
+    ports: [ "9696:9696" ]
     networks: [ web ]
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9696/actuator/health" ]
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:9696/actuator/health" ]
       interval: 15s
       retries: 3
   nginx:
@@ -57,6 +70,3 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
     networks: [ web ]
     restart: unless-stopped
-networks:
-  web:
-    driver: bridge

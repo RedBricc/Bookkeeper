@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://host.docker.internal:4321/bookkeeper
+    username: bookkeeper
+    password: admin
+logging:
+  level:
+    web: debug
+    sql: info
