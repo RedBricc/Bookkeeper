@@ -1,4 +1,4 @@
-package vallterra.bookkeeper.ui.component;
+package vallterra.bookkeeper.ui.component.filter;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
@@ -7,12 +7,14 @@ import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import org.jooq.Condition;
 
-public abstract class FilterComponent<TComponent extends Component, TValue> extends Component
-        implements InputNotifier, HasValueChangeMode,
+public interface FilterComponent<TComponent extends Component, TValue>
+        extends InputNotifier, HasValueChangeMode,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
 
-    public abstract Condition getCondition();
+    Condition getCondition();
 
-    public abstract void clear();
+    Component getComponent();
+
+    void clear();
 
 }

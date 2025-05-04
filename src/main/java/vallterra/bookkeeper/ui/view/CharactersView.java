@@ -7,6 +7,7 @@ import jakarta.annotation.security.PermitAll;
 import org.jooq.generated.tables.records.CharacterRecord;
 import vallterra.bookkeeper.ui.MainLayout;
 import vallterra.bookkeeper.ui.component.common.BookkeeperGridLayout;
+import vallterra.bookkeeper.ui.component.filter.component.NumberFilter;
 
 import static org.jooq.generated.tables.Character.CHARACTER;
 
@@ -31,9 +32,10 @@ public class CharactersView extends BookkeeperGridLayout<CharacterRecord> {
         grid().addColumn(CHARACTER.BACKGROUND);
         grid().addColumn(CHARACTER.ALIGNMENT);
 
+        addFilter(new NumberFilter(CHARACTER.LEVEL));
+
         grid().asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                // Navigate to character detail view
                 getUI().ifPresent(ui -> ui.navigate(CharacterDetailView.class, event.getValue().getId()));
             }
         });
@@ -41,11 +43,6 @@ public class CharactersView extends BookkeeperGridLayout<CharacterRecord> {
 
     private void configureToolbar() {
         var addCharacterButton = new Button("Add Character", VaadinIcon.PLUS.create());
-        addCharacterButton.addClickListener(click -> {
-            grid().asSingleSelect().clear();
-            // Navigate to character detail view when it's created
-            // getUI().ifPresent(ui -> ui.navigate("character/new"));
-        });
         addActionComponent(addCharacterButton);
     }
 }

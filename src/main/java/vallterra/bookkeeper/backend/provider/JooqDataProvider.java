@@ -1,9 +1,16 @@
 package vallterra.bookkeeper.backend.provider;
 
-import com.vaadin.flow.data.provider.*;
+import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
-import org.jooq.*;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.SortField;
+import org.jooq.Table;
 import vallterra.bookkeeper.ui.data.Access;
 
 import java.util.HashMap;
@@ -21,12 +28,12 @@ import java.util.stream.Stream;
 public class JooqDataProvider<R extends Record, F>
         extends AbstractBackEndDataProvider<R, F> {
 
-    private final DSLContext dsl;
+    private final DSLContext db;
     private final Table<R> table;
     private final Map<UUID, Condition> conditionMap;
 
     public JooqDataProvider(Table<R> table) {
-        this.dsl = Access.db();
+        this.db = Access.db();
         this.table = table;
         conditionMap = new HashMap<>();
     }
@@ -41,7 +48,7 @@ public class JooqDataProvider<R extends Record, F>
                 .map(this::toSortField)
                 .toList();
 
-        return dsl.selectFrom(table)
+        return db.selectFrom(table)
                 .where(conditionMap.values())
                 .orderBy(orderBy)
                 .offset(query.getOffset())
@@ -51,7 +58,7 @@ public class JooqDataProvider<R extends Record, F>
 
     @Override
     protected int sizeInBackEnd(Query<R, F> query) {
-        return dsl.selectCount()
+        return db.selectCount()
                 .from(table)
                 .where(conditionMap.values())
                 .fetchSingleInto(Integer.class);
@@ -97,6 +104,23 @@ public class JooqDataProvider<R extends Record, F>
     public void removeCondition(UUID id) {
         conditionMap.remove(id);
         refreshAll();
+    }
+
+    /**
+     * Clears all conditions and refreshes the data.
+     */
+    public void clearConditions() {
+        conditionMap.clear();
+        refreshAll();
+    }
+
+    /**
+     * Checks if there are any conditions applied to the data provider.
+     *
+     * @return true if there are conditions, false otherwise
+     */
+    public boolean hasConditions() {
+        return !conditionMap.isEmpty();
     }
 
 }

@@ -8,7 +8,7 @@ import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Theme(variant = Lumo.DARK)
+@Theme(value = "bookkeeper", variant = Lumo.DARK)
 @Push(value = PushMode.AUTOMATIC)
 @CssImport("./styles/shared-styles.css")
 public class AppShell implements AppShellConfigurator {
