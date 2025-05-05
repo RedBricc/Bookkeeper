@@ -1,0 +1,4 @@
+[part~="body-cell"][part~="end-aligned"] ::slotted(vaadin-grid-cell-content) {
+    padding-right: 33px;
+    text-overflow: clip;
+}

@@ -11,6 +11,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @Theme(value = "bookkeeper", variant = Lumo.DARK)
 @Push(value = PushMode.AUTOMATIC)
 @CssImport("./styles/shared-styles.css")
+@CssImport(value = "./styles/bookkeeper-grid.css", themeFor = "vaadin-grid")
 public class AppShell implements AppShellConfigurator {
 
     @Override

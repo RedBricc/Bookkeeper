@@ -1,16 +1,11 @@
 package vallterra.bookkeeper.backend.provider;
 
-import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.data.provider.SortDirection;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Field;
+import jakarta.annotation.Nullable;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.SortField;
-import org.jooq.Table;
+import org.springframework.validation.annotation.Validated;
 import vallterra.bookkeeper.ui.data.Access;
 
 import java.util.HashMap;
@@ -25,17 +20,20 @@ import java.util.stream.Stream;
  * @param <R> the jOOQ {@link Record} type returned to the Grid
  * @param <F> filter value type (use {@link Void} if you do not support filtering)
  */
+@Validated
 public class JooqDataProvider<R extends Record, F>
         extends AbstractBackEndDataProvider<R, F> {
 
     private final DSLContext db;
     private final Table<R> table;
     private final Map<UUID, Condition> conditionMap;
+    private Condition fixedConditions;
 
     public JooqDataProvider(Table<R> table) {
         this.db = Access.db();
         this.table = table;
         conditionMap = new HashMap<>();
+        fixedConditions = null;
     }
 
     @Override
@@ -50,6 +48,7 @@ public class JooqDataProvider<R extends Record, F>
 
         return db.selectFrom(table)
                 .where(conditionMap.values())
+                .and(fixedConditions)
                 .orderBy(orderBy)
                 .offset(query.getOffset())
                 .limit(query.getLimit())
@@ -61,6 +60,7 @@ public class JooqDataProvider<R extends Record, F>
         return db.selectCount()
                 .from(table)
                 .where(conditionMap.values())
+                .and(fixedConditions)
                 .fetchSingleInto(Integer.class);
     }
 
@@ -75,13 +75,18 @@ public class JooqDataProvider<R extends Record, F>
     /**
      * Adds a condition to the data provider without refreshing the data.
      * To apply the condition, call {@link #refreshAll()} or use {@link #applyCondition(UUID, Condition)}.
+     * If the condition is {@code  null}, a new ID will be generated without adding anything to the data provider.
      *
      * @param condition the condition to add
-     * @return a unique identifier for the condition that can be used to remove it later
+     * @return a unique identifier for the condition that can be used to update or remove it later
      */
-    public UUID registerCondition(Condition condition) {
+    public UUID registerCondition(@Nullable Condition condition) {
         UUID id = UUID.randomUUID();
-        conditionMap.put(id, condition);
+
+        if (condition != null) {
+            conditionMap.put(id, condition);
+        }
+
         return id;
     }
 
@@ -121,6 +126,16 @@ public class JooqDataProvider<R extends Record, F>
      */
     public boolean hasConditions() {
         return !conditionMap.isEmpty();
+    }
+
+    /**
+     * Adds fixed condition to the data provider.
+     * This condition is always applied to the data provider and will not be cleared by {@link #clearConditions()}.
+     *
+     * @param condition the fixed condition to set
+     */
+    public void addFixedCondition(Condition condition) {
+        this.fixedConditions = fixedConditions == null ? condition : fixedConditions.and(condition);
     }
 
 }

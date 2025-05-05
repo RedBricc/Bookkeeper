@@ -6,26 +6,28 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.TableField;
-import vallterra.bookkeeper.backend.util.BookkeeperCaseUtils;
 import vallterra.bookkeeper.ui.component.filter.FilterComponent;
+import vallterra.bookkeeper.ui.component.filter.FilterLabelPosition;
 
 import java.util.function.Supplier;
 
 public class NumberFilter extends NumberField
         implements FilterComponent<NumberField, Double> {
 
-    private Supplier<Condition> condition;
+    private final Supplier<Condition> condition;
 
     public <R extends Record, V extends Number> NumberFilter(TableField<R, V> field) {
-        super();
-        this.setLabel(BookkeeperCaseUtils.snakeCaseToTitleCase(field.getName()));
-        this.condition = () -> this.getValue() == null ? null : field.eq((V) this.getValue());
-        this.setValueChangeMode(ValueChangeMode.EAGER);
+        this(field, FilterLabelPosition.TOP);
     }
 
-    @Override
-    public Condition getCondition() {
-        return condition.get();
+    public <R extends Record, V extends Number> NumberFilter(TableField<R, V> field, FilterLabelPosition filterLabelPosition) {
+        super();
+
+        setupLabel(field, filterLabelPosition);
+        this.setTooltipText("Enter a number to filter by (inclusive)");
+
+        this.condition = () -> this.getValue() == null ? null : field.eq((V) this.getValue());
+        this.setValueChangeMode(ValueChangeMode.EAGER);
     }
 
     @Override
@@ -34,9 +36,13 @@ public class NumberFilter extends NumberField
     }
 
     @Override
+    public Condition getCondition() {
+        return condition.get();
+    }
+
+    @Override
     public void clear() {
         super.clear();
-        condition = () -> null;
     }
 
 }

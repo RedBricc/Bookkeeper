@@ -1,8 +1,9 @@
-package vallterra.bookkeeper.ui.component.common;
+package vallterra.bookkeeper.ui.component.grid;
 
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -13,10 +14,11 @@ import jakarta.validation.constraints.NotNull;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.springframework.validation.annotation.Validated;
+import vallterra.bookkeeper.ui.component.common.VerticalBorderLayout;
 import vallterra.bookkeeper.ui.component.filter.FilterComponent;
 
 @Validated
-public abstract class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
+public class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
 
     private VerticalBorderLayout filterLayout;
     private Button filterToggle;
@@ -30,23 +32,27 @@ public abstract class BookkeeperGridLayout<R extends Record> extends VerticalLay
         setSizeFull();
     }
 
-    protected BookkeeperGridLayout<R> configure(@NotNull Table<R> table, @NotBlank String title) {
+    public BookkeeperGridLayout<R> configure(@NotNull Table<R> table, @NotBlank String title) {
+        return configure(table, title, true, DisplayMode.DEFAULT);
+    }
+
+    public BookkeeperGridLayout<R> configure(@NotNull Table<R> table, @NotBlank String title, boolean includeHeaderFilters, @NotNull DisplayMode displayMode) {
         var refreshButton = new Button(VaadinIcon.REFRESH.create());
         refreshButton.setTooltipText("Refresh");
-        refreshButton.setThemeName("tertiary");
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.getStyle().setMargin("0");
         refreshButton.addClickListener(_ ->
                 grid.refreshAll());
 
         filterToggle = new Button(VaadinIcon.FILTER.create());
         filterToggle.setTooltipText("Show additional filters");
-        filterToggle.setThemeName("tertiary");
+        filterToggle.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         filterToggle.getStyle().setMargin("0");
         filterToggle.setVisible(false);
 
         clearFilters = new Button(VaadinIcon.CLOSE.create());
         clearFilters.setTooltipText("Clear filters");
-        clearFilters.setThemeName("tertiary");
+        clearFilters.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         clearFilters.getStyle().setMargin("0");
         clearFilters.addClickListener(_ -> {
             grid.clearConditions();
@@ -57,7 +63,9 @@ public abstract class BookkeeperGridLayout<R extends Record> extends VerticalLay
         var titleActions = new HorizontalLayout(refreshButton, filterToggle, clearFilters);
         titleActions.setSpacing(false);
 
-        var titleLayout = new HorizontalLayout(new H2(title), titleActions);
+        var titleComponent = DisplayMode.DEFAULT.equals(displayMode) ? new H2(title) : new H3(title);
+
+        var titleLayout = new HorizontalLayout(titleComponent, titleActions);
 
         actions = new HorizontalLayout();
         var headerLayout = new HorizontalLayout(titleLayout, actions);
@@ -83,17 +91,25 @@ public abstract class BookkeeperGridLayout<R extends Record> extends VerticalLay
         filterToggle.addClickListener(_ ->
                 filterLayout.setVisible(!filterLayout.isVisible()));
 
-        grid = new BookkeeperGrid<>(table);
+        grid = new BookkeeperGrid<>(table, includeHeaderFilters, DisplayMode.DEFAULT.equals(displayMode));
         grid.setSizeFull();
 
         grid.addOnFilterSetListener(_ ->
                 clearFilters.setVisible(true));
-        grid.addOnAllFilterClearListener(() ->
+        grid.addOnAllFiltersClearListener(() ->
                 clearFilters.setVisible(false));
 
         bodyLayout.add(filterLayout, grid);
         bodyLayout.setSizeFull();
         add(bodyLayout);
+
+        if (DisplayMode.COMPACT.equals(displayMode)) {
+            refreshButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            filterToggle.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            clearFilters.addThemeVariants(ButtonVariant.LUMO_SMALL);
+
+            grid.setAllRowsVisible(true);
+        }
 
         return this;
     }
@@ -109,22 +125,26 @@ public abstract class BookkeeperGridLayout<R extends Record> extends VerticalLay
         grid.refreshAll();
     }
 
-    public Component addFilter(FilterComponent<?, ?> filter) {
+    public FilterComponent<?, ?> addFilter(FilterComponent<?, ?> filter) {
         filterToggle.setVisible(true);
         filterLayout.setVisible(true);
 
-        var filterComponent = filter.getComponent();
-        filterComponent.getStyle().setWidth("100%");
+        filter.getStyle().setWidth("100%");
 
-        filters.add(filterComponent);
+        filters.add((Component) filter);
         grid.registerFilter(filter);
 
-        return filterComponent;
+        return filter;
     }
 
     public Component addActionComponent(Component action) {
         actions.add(action);
         return action;
+    }
+
+    public enum DisplayMode {
+        DEFAULT,
+        COMPACT,
     }
 
 }

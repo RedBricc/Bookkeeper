@@ -1,0 +1,47 @@
+.bookkeeper-grid {
+    vaadin-grid-cell-content {
+        align-self: end;
+
+        vaadin-grid-sorter:has(.grid-header-filter) {
+            &::part(indicators) {
+                align-self: end;
+                margin-bottom: 16px;
+            }
+        }
+
+        .grid-header-filter {
+            margin: 8px 0 6px 0;
+            padding: 0;
+            max-width: 100%;
+
+            &::part(input-field) {
+                padding: 0 0 0 6px;
+                border: 1px solid var(--lumo-contrast-10pct);
+                background: var(--vaadin-input-field-background, var(--lumo-contrast-5pct));
+            }
+
+            label {
+                text-wrap: auto;
+                text-align: start;
+                display: block;
+                color: var(--lumo-body-text-color);
+            }
+
+            input {
+                color: var(--lumo-body-text-color);
+                padding: 0;
+                mask-image: linear-gradient(to left, transparent, #000 6px);
+
+                &::placeholder {
+                    color: var(--lumo-body-text-color);
+                    font-size: var(--lumo-font-size-s);
+                    text-overflow: ellipsis;
+                }
+            }
+
+            div[slot='helper'] {
+                color: var(--lumo-body-text-color);
+            }
+        }
+    }
+}
