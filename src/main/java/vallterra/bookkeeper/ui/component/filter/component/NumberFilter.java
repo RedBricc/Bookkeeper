@@ -14,20 +14,23 @@ import java.util.function.Supplier;
 public class NumberFilter extends NumberField
         implements FilterComponent<NumberField, Double> {
 
-    private final Supplier<Condition> condition;
+    private final Supplier<Condition> conditionSupplier;
 
     public <R extends Record, V extends Number> NumberFilter(TableField<R, V> field) {
         this(field, FilterLabelPosition.TOP);
     }
 
+    @SuppressWarnings("unchecked")
     public <R extends Record, V extends Number> NumberFilter(TableField<R, V> field, FilterLabelPosition filterLabelPosition) {
         super();
 
         setupLabel(field, filterLabelPosition);
         this.setTooltipText("Enter a number to filter by (inclusive)");
 
-        this.condition = () -> this.getValue() == null ? null : field.eq((V) this.getValue());
+        this.conditionSupplier = () -> this.getValue() == null ? null : field.eq((V) this.getValue());
         this.setValueChangeMode(ValueChangeMode.EAGER);
+
+        this.setMinWidth("40px");
     }
 
     @Override
@@ -37,7 +40,7 @@ public class NumberFilter extends NumberField
 
     @Override
     public Condition getCondition() {
-        return condition.get();
+        return conditionSupplier.get();
     }
 
     @Override

@@ -62,6 +62,7 @@ public class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
 
         var titleActions = new HorizontalLayout(refreshButton, filterToggle, clearFilters);
         titleActions.setSpacing(false);
+        titleActions.setAlignItems(Alignment.CENTER);
 
         var titleComponent = DisplayMode.DEFAULT.equals(displayMode) ? new H2(title) : new H3(title);
 

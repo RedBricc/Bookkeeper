@@ -29,9 +29,10 @@ select
     vu.player_name,
     ca.adventure_count
 from character c
-join public.vallterra_user vu on c.vallterra_user_id = vu.id
-join (
+left join public.vallterra_user vu on c.vallterra_user_id = vu.id
+left join (
     select ca.character_id, count(ca.id) as adventure_count
     from character_adventure ca
     group by ca.character_id
 ) ca on ca.character_id = c.id
+order by c.id

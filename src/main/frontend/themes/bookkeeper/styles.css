@@ -1,3 +1,28 @@
+.toggleable-number-range-filter {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-xs);
+    align-items: center;
+
+    .toggleable-number-range-input {
+        flex: 1;
+        min-width: 24px !important;
+        width: 120px;
+        padding: 0;
+
+        input {
+            mask-image: none !important;
+        }
+    }
+
+    vaadin-button {
+        min-width: 24px !important;
+        width: 24px;
+        margin: 0;
+    }
+}
+
 .bookkeeper-grid {
     vaadin-grid-cell-content {
         align-self: end;
@@ -5,20 +30,26 @@
         vaadin-grid-sorter:has(.grid-header-filter) {
             &::part(indicators) {
                 align-self: end;
-                margin-bottom: 16px;
+                margin-bottom: 14px;
             }
+        }
+
+        ::part(input-field) {
+            box-sizing: border-box;
+            padding: 0 0 0 6px;
+            background: var(--vaadin-input-field-background, var(--lumo-contrast-5pct));
+        }
+
+        .grid-header-filter::part(label) {
+            padding-bottom: 0.5em;
+            padding-right: 0.25em;
         }
 
         .grid-header-filter {
             margin: 8px 0 6px 0;
             padding: 0;
             max-width: 100%;
-
-            &::part(input-field) {
-                padding: 0 0 0 6px;
-                border: 1px solid var(--lumo-contrast-10pct);
-                background: var(--vaadin-input-field-background, var(--lumo-contrast-5pct));
-            }
+            align-items: end;
 
             label {
                 text-wrap: auto;

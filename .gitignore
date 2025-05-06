@@ -38,3 +38,4 @@ out/
 .vscode/
 /src/main/frontend/generated/
 /vite.generated.ts
+/src/main/bundles/

@@ -19,8 +19,8 @@ import org.jooq.TableField;
 import vallterra.bookkeeper.backend.provider.JooqDataProvider;
 import vallterra.bookkeeper.backend.util.BookkeeperCaseUtils;
 import vallterra.bookkeeper.ui.component.filter.FilterComponent;
-import vallterra.bookkeeper.ui.component.filter.component.NumberFilter;
 import vallterra.bookkeeper.ui.component.filter.component.TextFilter;
+import vallterra.bookkeeper.ui.component.filter.component.ToggleableNumberRangeFilter;
 import vallterra.bookkeeper.ui.component.filter.event.FilterEvent;
 
 import java.util.ArrayList;
@@ -170,7 +170,7 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
         return addColumn(tableField)
                 .setFlexGrow(0)
                 .setAutoWidth(false)
-                .setWidth("90px");
+                .setWidth("150px");
     }
 
     public <I, V extends Component & HasUrlParameter<I>> Column<R> addRouteColumn(TableField<R, ?> labelField, TableField<R, I> idField, Class<V> target) {
@@ -193,7 +193,7 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
 
         return switch (tableField.getType()) {
             case Class<V> c when Number.class.isAssignableFrom(c) -> {
-                var numberFilter = new NumberFilter((TableField<R, ? extends Number>) tableField);
+                var numberFilter = new ToggleableNumberRangeFilter((TableField<R, ? extends Number>) tableField);
                 addHeaderFilter(numberFilter, column);
                 column.setPartNameGenerator(_ -> "end-aligned");
 

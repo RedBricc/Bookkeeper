@@ -1,9 +1,6 @@
 package vallterra.bookkeeper.ui.component.filter;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasPlaceholder;
-import com.vaadin.flow.component.InputNotifier;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import org.jooq.Condition;
@@ -12,7 +9,7 @@ import org.jooq.TableField;
 import vallterra.bookkeeper.backend.util.BookkeeperCaseUtils;
 
 public interface FilterComponent<TComponent extends Component, TValue>
-        extends InputNotifier, HasValueChangeMode, HasPlaceholder,
+        extends InputNotifier, HasValueChangeMode, HasPlaceholder, HasAriaLabel,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
 
     Condition getCondition();
@@ -23,6 +20,7 @@ public interface FilterComponent<TComponent extends Component, TValue>
 
     default <R extends Record, V> void setupLabel(TableField<R, V> field, FilterLabelPosition filterLabelPosition) {
         var label = BookkeeperCaseUtils.snakeCaseToTitleCase(field.getName());
+        this.setAriaLabel(field.getName());
         switch (filterLabelPosition) {
             case NONE -> this.setLabel(null);
             case TOP -> this.setLabel(label);

@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class TextFilter extends TextField
         implements FilterComponent<TextField, String> {
 
-    private final Supplier<Condition> condition;
+    private final Supplier<Condition> conditionSupplier;
     private final boolean caseSensitive;
 
     public <R extends Record> TextFilter(TableField<R, String> field) {
@@ -26,9 +26,9 @@ public class TextFilter extends TextField
         super();
         setupLabel(field, filterLabelPosition);
 
-        this.condition = () -> buildCondition(field);
+        this.conditionSupplier = () -> buildCondition(field);
         this.caseSensitive = caseSensitive;
-        this.setValueChangeMode(ValueChangeMode.EAGER);
+        this.setValueChangeMode(ValueChangeMode.LAZY);
     }
 
     private <R extends Record> Condition buildCondition(TableField<R, String> field) {
@@ -52,7 +52,7 @@ public class TextFilter extends TextField
 
     @Override
     public Condition getCondition() {
-        return condition.get();
+        return conditionSupplier.get();
     }
 
     @Override

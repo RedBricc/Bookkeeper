@@ -1,0 +1,3 @@
+:host([theme~='icon']:not([theme~='tertiary-inline'])) {
+    padding: 0;
+}

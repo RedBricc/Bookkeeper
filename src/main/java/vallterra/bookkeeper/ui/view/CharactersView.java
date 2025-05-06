@@ -36,14 +36,11 @@ public class CharactersView extends BookkeeperGridLayout<VCharacterRecord> {
         grid().addFixedSizeColumn(V_CHARACTER.ARMOR_CLASS)
                 .setRenderer(new FormattedTextRenderer<>(VCharacterRecord::getArmorClass, "%d AC"));
         grid().addFixedSizeColumn(V_CHARACTER.INITIATIVE)
-                .setRenderer(new PlusPrefixedNumberTextRenderer<>(VCharacterRecord::getInitiative))
-                .setWidth("105px");
+                .setRenderer(new PlusPrefixedNumberTextRenderer<>(VCharacterRecord::getInitiative));
         grid().addFixedSizeColumn(V_CHARACTER.SPEED)
                 .setRenderer(new FormattedTextRenderer<>(VCharacterRecord::getSpeed, "%d ft"));
-        grid().addFixedSizeColumn(V_CHARACTER.PASSIVE_PERCEPTION)
-                .setWidth("120px");
-        grid().addFixedSizeColumn(V_CHARACTER.PASSIVE_INSIGHT)
-                .setWidth("100px");
+        grid().addFixedSizeColumn(V_CHARACTER.PASSIVE_PERCEPTION);
+        grid().addFixedSizeColumn(V_CHARACTER.PASSIVE_INSIGHT);
     }
 
     private void configureToolbar() {
