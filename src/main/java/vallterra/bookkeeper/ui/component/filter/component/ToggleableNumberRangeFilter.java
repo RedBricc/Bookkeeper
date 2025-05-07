@@ -59,11 +59,12 @@ public class ToggleableNumberRangeFilter extends CustomField<NumberRange<Number>
             case RANGE -> getRangeCondition(field);
         };
 
-        this.setValueChangeMode(ValueChangeMode.EAGER);
+        this.setValueChangeMode(ValueChangeMode.LAZY);
 
         setFilterMode(filterMode);
 
-        var layout = new HorizontalLayout(firstNumberFilter, secondNumberFilter, toggleButton);
+        // The filter container has flex-direction: row-reverse, so we need to reverse the order of the components
+        var layout = new HorizontalLayout(toggleButton, secondNumberFilter, firstNumberFilter);
         layout.setClassName("toggleable-number-range-filter");
 
         add(layout);

@@ -28,7 +28,7 @@ public class NumberFilter extends NumberField
         this.setTooltipText("Enter a number to filter by (inclusive)");
 
         this.conditionSupplier = () -> this.getValue() == null ? null : field.eq((V) this.getValue());
-        this.setValueChangeMode(ValueChangeMode.EAGER);
+        this.setValueChangeMode(ValueChangeMode.LAZY);
 
         this.setMinWidth("40px");
     }

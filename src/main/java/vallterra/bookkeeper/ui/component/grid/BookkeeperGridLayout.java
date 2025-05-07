@@ -104,12 +104,13 @@ public class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
         bodyLayout.setSizeFull();
         add(bodyLayout);
 
-        if (DisplayMode.COMPACT.equals(displayMode)) {
+        if (DisplayMode.DETAILS.equals(displayMode)) {
             refreshButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
             filterToggle.addThemeVariants(ButtonVariant.LUMO_SMALL);
             clearFilters.addThemeVariants(ButtonVariant.LUMO_SMALL);
 
             grid.setAllRowsVisible(true);
+            grid.addThemeName("details");
         }
 
         return this;
@@ -145,7 +146,7 @@ public class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
 
     public enum DisplayMode {
         DEFAULT,
-        COMPACT,
+        DETAILS,
     }
 
 }

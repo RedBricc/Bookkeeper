@@ -1,4 +1,19 @@
 [part~="body-cell"][part~="end-aligned"] ::slotted(vaadin-grid-cell-content) {
-    padding-right: 33px;
+    padding-right: 23px;
+}
+
+[part~="header-cell"] ::slotted(vaadin-grid-cell-content) {
+    align-self: end;
+}
+
+[part~='clipped'] ::slotted(vaadin-grid-cell-content) {
     text-overflow: clip;
+}
+
+:host([theme~='details']) [part~='cell'] ::slotted(vaadin-grid-cell-content) {
+    --_cell-padding: var(--lumo-space-s) 0.75rem;
+}
+
+:host([theme~='details']) [part~='header-cell'] ::slotted(vaadin-grid-cell-content) {
+    --_cell-padding: var(--lumo-space-m) 0.75rem var(--lumo-space-s) 0.75rem;
 }

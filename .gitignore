@@ -39,3 +39,11 @@ out/
 /src/main/frontend/generated/
 /vite.generated.ts
 /src/main/bundles/
+*.log
+*.jfr
+/package.json
+/package-lock.json
+/tsconfig.json
+/types.d.ts
+/vite.config.ts
+

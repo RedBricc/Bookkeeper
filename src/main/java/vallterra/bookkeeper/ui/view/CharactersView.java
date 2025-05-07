@@ -25,11 +25,13 @@ public class CharactersView extends BookkeeperGridLayout<VCharacterRecord> {
         configureGrid();
         configureToolbar();
 
+        grid().setDetailsVisibleOnClick(false);
         grid().setItemDetailsRenderer(new ComponentRenderer<>(this::createDetailsLayout));
     }
 
     private void configureGrid() {
-        grid().addFixedSizeColumn(V_CHARACTER.ID);
+        grid().addDetailsToggleColumn();
+        grid().addFixedSizeColumn(V_CHARACTER.ID).setWidth("90px");
         grid().addRouteColumn(V_CHARACTER.NAME, V_CHARACTER.ID, CharacterDetailView.class);
         grid().addFixedSizeColumn(V_CHARACTER.LEVEL);
         grid().addColumn(V_CHARACTER.MAIN_CLASS);
@@ -52,7 +54,7 @@ public class CharactersView extends BookkeeperGridLayout<VCharacterRecord> {
     private BookkeeperGridLayout<VCharacterRecord> createDetailsLayout(VCharacterRecord character) {
         var detailsLayout = new BookkeeperGridLayout<VCharacterRecord>();
         detailsLayout.setSizeFull();
-        detailsLayout.configure(V_CHARACTER, "Character details", false, DisplayMode.COMPACT);
+        detailsLayout.configure(V_CHARACTER, "Character details", false, DisplayMode.DETAILS);
 
         detailsLayout.grid().addFixedCondition(V_CHARACTER.ID.eq(character.getId()));
 
