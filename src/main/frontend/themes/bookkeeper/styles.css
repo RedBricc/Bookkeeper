@@ -1,16 +1,16 @@
-.toggleable-number-range-filter {
+.toggleable-range-filter {
     width: 100%;
     max-width: 100%;
+    justify-content: flex-end;
     flex-direction: row-reverse;
     flex-wrap: wrap-reverse;
     gap: var(--lumo-space-xs);
     align-items: center;
 
-    .toggleable-number-range-input {
+    .toggleable-range-input {
         flex: 1;
-        min-width: 24px !important;
-        width: 160px;
         padding: 0;
+        width: 160px;
 
         input {
             mask-image: none !important;
@@ -21,6 +21,24 @@
         min-width: 24px !important;
         width: 24px;
         margin: 0;
+    }
+}
+
+.toggleable-number-range-filter {
+    .toggleable-number-range-input {
+        min-width: 24px;
+    }
+}
+
+.toggleable-date-range-filter {
+    .toggleable-date-range-input {
+        min-width: 130px;
+    }
+}
+
+.toggleable-duration-range-filter {
+    .toggleable-duration-range-input {
+        max-width: fit-content;
     }
 }
 
@@ -48,8 +66,20 @@
             margin: 8px 0 6px 0;
             padding: 0;
             max-width: 100%;
-            width: 160px;
+            width: 200px;
             align-items: end;
+
+            &.duration-field {
+                width: fit-content;
+            }
+
+            &:has(.toggleable-date-range-filter) {
+                width: 300px;
+            }
+
+            &:has(.toggleable-duration-range-filter) {
+                width: 340px;
+            }
 
             label {
                 text-wrap: auto;
@@ -75,4 +105,14 @@
             }
         }
     }
+}
+
+.bookkeeper-text-area textarea {
+    padding: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-xs);
+    color: var(--lumo-body-text-color);
+    font-weight: normal;
+}
+
+html {
+    --vaadin-field-default-width: fit-content;
 }

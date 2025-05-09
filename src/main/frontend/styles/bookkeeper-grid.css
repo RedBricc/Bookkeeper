@@ -1,4 +1,5 @@
 [part~="body-cell"][part~="end-aligned"] ::slotted(vaadin-grid-cell-content) {
+    text-align: end;
     padding-right: 23px;
 }
 
@@ -16,4 +17,14 @@
 
 :host([theme~='details']) [part~='header-cell'] ::slotted(vaadin-grid-cell-content) {
     --_cell-padding: var(--lumo-space-m) 0.75rem var(--lumo-space-s) 0.75rem;
+}
+
+[part~='completed']:not([part~='details-cell']) ::slotted(vaadin-grid-cell-content) {
+    --lumo-body-text-color: var(--lumo-secondary-text-color);
+    --lumo-primary-text-color: var(--lumo-secondary-text-color);
+}
+
+[part~='not-started']:not([part~='details-cell']) ::slotted(vaadin-grid-cell-content) {
+    --lumo-body-text-color: var(--lumo-secondary-text-color);
+    --lumo-primary-text-color: var(--lumo-primary-color-50pct);
 }

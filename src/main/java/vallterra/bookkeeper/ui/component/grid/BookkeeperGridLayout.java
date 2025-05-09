@@ -14,29 +14,28 @@ import jakarta.validation.constraints.NotNull;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.springframework.validation.annotation.Validated;
-import vallterra.bookkeeper.ui.component.common.VerticalBorderLayout;
 import vallterra.bookkeeper.ui.component.filter.FilterComponent;
+import vallterra.bookkeeper.ui.component.layout.VerticalBorderLayout;
 
 @Validated
 public class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
 
-    private VerticalBorderLayout filterLayout;
-    private Button filterToggle;
-    private VerticalLayout filters;
-    private Button clearFilters;
-    private HorizontalLayout actions;
-    private BookkeeperGrid<R> grid;
+    private final VerticalBorderLayout filterLayout;
+    private final Button filterToggle;
+    private final VerticalLayout filters;
+    private final Button clearFilters;
+    private final HorizontalLayout actions;
+    private final BookkeeperGrid<R> grid;
 
-    public BookkeeperGridLayout() {
-        super();
+    public BookkeeperGridLayout(@NotNull Table<R> table, @NotBlank String title) {
+        this(table, title, true, DisplayMode.DEFAULT);
+    }
+
+    public BookkeeperGridLayout(@NotNull Table<R> table, @NotBlank String title, boolean includeHeaderFilters, @NotNull DisplayMode displayMode) {
         setSizeFull();
-    }
 
-    public BookkeeperGridLayout<R> configure(@NotNull Table<R> table, @NotBlank String title) {
-        return configure(table, title, true, DisplayMode.DEFAULT);
-    }
+        grid = new BookkeeperGrid<>(table, includeHeaderFilters, DisplayMode.DEFAULT.equals(displayMode));
 
-    public BookkeeperGridLayout<R> configure(@NotNull Table<R> table, @NotBlank String title, boolean includeHeaderFilters, @NotNull DisplayMode displayMode) {
         var refreshButton = new Button(VaadinIcon.REFRESH.create());
         refreshButton.setTooltipText("Refresh");
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -92,7 +91,6 @@ public class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
         filterToggle.addClickListener(_ ->
                 filterLayout.setVisible(!filterLayout.isVisible()));
 
-        grid = new BookkeeperGrid<>(table, includeHeaderFilters, DisplayMode.DEFAULT.equals(displayMode));
         grid.setSizeFull();
 
         grid.addOnFilterSetListener(_ ->
@@ -112,8 +110,6 @@ public class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
             grid.setAllRowsVisible(true);
             grid.addThemeName("details");
         }
-
-        return this;
     }
 
     public BookkeeperGrid<R> grid() {

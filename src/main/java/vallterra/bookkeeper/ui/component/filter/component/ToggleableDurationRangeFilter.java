@@ -7,48 +7,50 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import lombok.Getter;
-import org.apache.commons.lang3.NumberRange;
+import org.apache.commons.lang3.Range;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.TableField;
+import org.jooq.types.YearToSecond;
 import vallterra.bookkeeper.ui.component.filter.FilterLabelPosition;
 import vallterra.bookkeeper.ui.component.filter.FilterMode;
 import vallterra.bookkeeper.ui.component.filter.ToggleableFilterComponent;
 
-import java.util.Comparator;
 import java.util.function.Supplier;
 
-public class ToggleableNumberRangeFilter extends CustomField<NumberRange<Number>>
-        implements ToggleableFilterComponent<CustomField<NumberRange<Number>>, NumberRange<Number>> {
+public class ToggleableDurationRangeFilter extends CustomField<Range<YearToSecond>>
+        implements ToggleableFilterComponent<CustomField<Range<YearToSecond>>, Range<YearToSecond>> {
 
     private final Supplier<Condition> conditionSupplier;
-    private final NumberFilter firstFilter;
-    private final NumberFilter secondFilter;
+    private final DurationFilter firstFilter;
+    private final DurationFilter secondFilter;
     private final Button toggleButton;
 
     private FilterMode filterMode;
     @Getter
     private ValueChangeMode valueChangeMode;
 
-    public <R extends Record, V extends Number> ToggleableNumberRangeFilter(TableField<R, V> field) {
+    private static final YearToSecond MIN = YearToSecond.valueOf("-9999-12 -31 23:59:59.999999999");
+    private static final YearToSecond MAX = YearToSecond.valueOf("9999-12 -31 23:59:59.999999999");
+
+    public <R extends Record> ToggleableDurationRangeFilter(TableField<R, YearToSecond> field) {
         this(field, FilterLabelPosition.TOP, FilterMode.RANGE);
     }
 
-    public <R extends Record, V extends Number> ToggleableNumberRangeFilter(TableField<R, V> field, FilterLabelPosition filterLabelPosition, FilterMode filterMode) {
+    public <R extends Record> ToggleableDurationRangeFilter(TableField<R, YearToSecond> field, FilterLabelPosition filterLabelPosition, FilterMode filterMode) {
         super();
-
         setupLabel(field, filterLabelPosition);
 
-        firstFilter = new NumberFilter(field, FilterLabelPosition.NONE);
+        firstFilter = new DurationFilter(field, FilterLabelPosition.NONE);
         firstFilter.setManualValidation(true);
         firstFilter.addValueChangeListener(_ -> updateValue());
-        firstFilter.addClassNames("toggleable-range-input", "toggleable-number-range-input");
+        firstFilter.addClassNames("toggleable-range-input", "toggleable-duration-range-input");
 
-        secondFilter = new NumberFilter(field, FilterLabelPosition.NONE);
+        secondFilter = new DurationFilter(field, FilterLabelPosition.NONE);
         secondFilter.setManualValidation(true);
         secondFilter.setVisible(false);
         secondFilter.addValueChangeListener(_ -> updateValue());
-        secondFilter.addClassNames("toggleable-range-input", "toggleable-number-range-input");
+        secondFilter.addClassNames("toggleable-range-input", "toggleable-duration-range-input");
 
         toggleButton = new Button();
         toggleButton.addClickListener(_ -> toggle());
@@ -59,21 +61,19 @@ public class ToggleableNumberRangeFilter extends CustomField<NumberRange<Number>
             case RANGE -> getRangeCondition(field);
         };
 
-        this.setValueChangeMode(ValueChangeMode.LAZY);
-
+        setValueChangeMode(ValueChangeMode.LAZY);
         setFilterMode(filterMode);
 
         // The filter container has flex-direction: row-reverse, so we need to reverse the order of the components
         var layout = new HorizontalLayout(toggleButton, secondFilter, firstFilter);
-        layout.addClassNames("toggleable-range-filter", "toggleable-number-range-filter");
+        layout.addClassNames("toggleable-range-filter", "toggleable-duration-range-filter");
 
         add(layout);
     }
 
-    @SuppressWarnings("unchecked")
-    private <R extends Record, V extends Number> Condition getRangeCondition(TableField<R, V> field) {
-        var firstValue = (V) firstFilter.getValue();
-        var secondValue = (V) secondFilter.getValue();
+    private <R extends Record> Condition getRangeCondition(TableField<R, YearToSecond> field) {
+        var firstValue = firstFilter.getValue();
+        var secondValue = secondFilter.getValue();
 
         if (firstValue == null && secondValue == null) {
             return null;
@@ -89,7 +89,7 @@ public class ToggleableNumberRangeFilter extends CustomField<NumberRange<Number>
 
         if (firstValue.equals(secondValue)) {
             return field.eq(firstValue);
-        } else if (firstValue.doubleValue() > secondValue.doubleValue()) {
+        } else if (firstValue.compareTo(secondValue) < 0) {
             return field.ge(firstValue);
         } else {
             return field.between(firstValue, secondValue);
@@ -142,46 +142,47 @@ public class ToggleableNumberRangeFilter extends CustomField<NumberRange<Number>
     }
 
     @Override
-    public void setValue(NumberRange<Number> value) {
+    public void setValue(Range<YearToSecond> value) {
         if (value == null) {
             firstFilter.clear();
             secondFilter.clear();
         } else {
-            firstFilter.setValue(value.getMinimum().doubleValue());
-            secondFilter.setValue(value.getMaximum().doubleValue());
+            firstFilter.setValue(value.getMinimum());
+            secondFilter.setValue(value.getMaximum());
         }
     }
 
     @Override
-    protected NumberRange<Number> generateModelValue() {
+    protected Range<YearToSecond> generateModelValue() {
         return switch (filterMode) {
             case EQUAL -> generateEqualModelValue();
             case RANGE -> generateRangeModelValue();
         };
     }
 
-    private NumberRange<Number> generateEqualModelValue() {
+    private Range<YearToSecond> generateEqualModelValue() {
         if (firstFilter.getValue() == null) {
             return null;
         }
 
-        return new NumberRange<>(firstFilter.getValue(), firstFilter.getValue(), Comparator.comparingDouble(Number::doubleValue));
+        return Range.of(firstFilter.getValue(), firstFilter.getValue());
     }
 
-    private NumberRange<Number> generateRangeModelValue() {
-        var firstValue = firstFilter.getOptionalValue().orElse(Double.MIN_VALUE);
-        var secondValue = secondFilter.getOptionalValue().orElse(Double.MAX_VALUE);
+    private Range<YearToSecond> generateRangeModelValue() {
+        var firstValue = firstFilter.getOptionalValue().orElse(MIN);
+        var secondValue = secondFilter.getOptionalValue().orElse(MAX);
 
-        return new NumberRange<>(firstValue, secondValue, Comparator.comparingDouble(Number::doubleValue));
+        return Range.of(firstValue, secondValue);
     }
+
     @Override
-    protected void setPresentationValue(NumberRange<Number> newPresentationValue) {
+    protected void setPresentationValue(Range<YearToSecond> newPresentationValue) {
         if (newPresentationValue == null) {
             firstFilter.clear();
             secondFilter.clear();
         } else {
-            firstFilter.setValue(newPresentationValue.getMinimum().doubleValue());
-            secondFilter.setValue(newPresentationValue.getMaximum().doubleValue());
+            firstFilter.setValue(newPresentationValue.getMinimum());
+            secondFilter.setValue(newPresentationValue.getMaximum());
         }
     }
 

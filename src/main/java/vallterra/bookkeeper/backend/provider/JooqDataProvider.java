@@ -3,6 +3,8 @@ package vallterra.bookkeeper.backend.provider;
 import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.provider.Query;
 import jakarta.annotation.Nullable;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jooq.*;
 import org.jooq.Record;
 import org.springframework.validation.annotation.Validated;
@@ -20,11 +22,13 @@ import java.util.stream.Stream;
  * @param <R> the jOOQ {@link Record} type returned to the Grid
  * @param <F> filter value type (use {@link Void} if you do not support filtering)
  */
+@Slf4j
 @Validated
 public class JooqDataProvider<R extends Record, F>
         extends AbstractBackEndDataProvider<R, F> {
 
     private final DSLContext db;
+    @Getter
     private final Table<R> table;
     private final Map<UUID, Condition> conditionMap;
     private Condition fixedConditions;

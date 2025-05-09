@@ -45,7 +45,7 @@ public class AdventureRepositoryImpl implements AdventureRepository {
     }
 
     @Override
-    public List<Adventure> findByQuestId(Long questId) {
+    public List<Adventure> findByQuestId(Integer questId) {
         return db.selectFrom(ADVENTURE)
                 .where(ADVENTURE.QUEST_ID.eq(questId))
                 .fetchInto(Adventure.class);

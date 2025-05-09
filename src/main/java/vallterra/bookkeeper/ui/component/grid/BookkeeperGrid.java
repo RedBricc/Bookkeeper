@@ -1,5 +1,7 @@
 package vallterra.bookkeeper.ui.component.grid;
 
+import com.helger.commons.datetime.OffsetDate;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -7,36 +9,46 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IconFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.component.orderedlayout.ThemableLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.data.renderer.*;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.RouterLink;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.TableField;
+import org.jooq.types.YearToSecond;
 import vallterra.bookkeeper.backend.provider.JooqDataProvider;
 import vallterra.bookkeeper.backend.util.BookkeeperCaseUtils;
+import vallterra.bookkeeper.backend.util.BookkeeperDateTimeUtils;
 import vallterra.bookkeeper.ui.component.filter.FilterComponent;
-import vallterra.bookkeeper.ui.component.filter.component.NumberFilter;
-import vallterra.bookkeeper.ui.component.filter.component.TextFilter;
-import vallterra.bookkeeper.ui.component.filter.component.ToggleableNumberRangeFilter;
+import vallterra.bookkeeper.ui.component.filter.component.*;
 import vallterra.bookkeeper.ui.component.filter.event.FilterEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Slf4j
 public class BookkeeperGrid<R extends Record> extends Grid<R> {
 
     private final boolean includeHeaderFilters;
@@ -47,6 +59,20 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
     private final List<Runnable> allFiltersClearListeners;
     private final List<Runnable> clearConditionsListeners;
     private final HeaderRow filterRow;
+
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.getPattern());
+    private final DateTimeFormatter offsetDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm ZZ");
+
+    private final Map<Class<? extends Temporal>, Function<TableField<R, ? extends Temporal>, Renderer<R>>> temporalFormatLookupMap = Map.of(
+            LocalDate.class, tableField -> new LocalDateRenderer<>(t ->
+                    (LocalDate) t.getValue(tableField), DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.getPattern()),
+            OffsetDate.class, tableField -> new TextRenderer<>(t ->
+                    t.getValue(tableField) == null ? null : ((OffsetDate) t.getValue(tableField)).format(dateFormatter)),
+            LocalDateTime.class, tableField -> new LocalDateTimeRenderer<>(t ->
+                    (LocalDateTime) t.getValue(tableField), "yyyy-MM-dd HH:mm"),
+            OffsetDateTime.class, tableField -> new TextRenderer<>(t ->
+                    t.getValue(tableField) == null ? null : ((OffsetDateTime) t.getValue(tableField)).format(offsetDateTimeFormatter))
+    );
 
     public BookkeeperGrid(Table<R> table) {
         this(table, true, true);
@@ -148,16 +174,25 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
     public <C extends Component, V> void registerFilter(FilterComponent<C, V> filter) {
         UUID id = registerCondition(filter.getCondition());
 
-        filter.addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                applyCondition(id, filter.getCondition());
-            } else {
-                removeCondition(id);
-            }
-        });
+        if (filter.getValueChangeMode() == ValueChangeMode.EAGER) {
+            filter.addValueChangeListener(event ->
+                    updateCondition(filter, event, id));
+        } else {
+            filter.addDebouncedValueChangeListener(event ->
+                            updateCondition(filter, event, id),
+                    Duration.ofMillis(400));
 
-        addOnClearConditionsListener(filter::clear);
+            addOnClearConditionsListener(filter::clear);
+        }
 
+    }
+
+    private <C extends Component, V> void updateCondition(FilterComponent<C, V> filter, AbstractField.ComponentValueChangeEvent<C, V> event, UUID id) {
+        if (event.getValue() != null) {
+            applyCondition(id, filter.getCondition());
+        } else {
+            removeCondition(id);
+        }
     }
 
     /**
@@ -175,56 +210,227 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
      * Defaults to a width of 90px and no flex grow.
      */
     public Column<R> addFixedSizeColumn(TableField<R, ?> tableField) {
-        return addColumn(tableField)
+        return addFixedSizeColumn(tableField, false);
+    }
+
+    /**
+     * Adds a fixed size column to the grid with the values provided by the given TableField.
+     *
+     * @param tableField the TableField to use as the value provider
+     * @param width      the width of the column in pixels
+     */
+    public Column<R> addFixedSizeColumn(TableField<R, ?> tableField, Integer width) {
+        return addFixedSizeColumn(tableField, width, false);
+    }
+
+    /**
+     * Adds a fixed size column to the grid with the values provided by the given TableField.
+     * Defaults to a width of 150px and no flex grow.
+     *
+     * @param tableField           the TableField to use as the value provider
+     * @param useAlternativeFilter if true, use the alternative filter component. The specific filter component is dependent on the type of the TableField.
+     */
+    public Column<R> addFixedSizeColumn(TableField<R, ?> tableField, boolean useAlternativeFilter) {
+        return addFixedSizeColumn(tableField, 150, useAlternativeFilter);
+    }
+
+    /**
+     * Adds a fixed size column to the grid with the values provided by the given TableField.
+     *
+     * @param tableField           the TableField to use as the value provider
+     * @param width                the width of the column in pixels
+     * @param useAlternativeFilter if true, use the alternative filter component. The specific filter component is dependent on the type of the TableField.
+     */
+    public Column<R> addFixedSizeColumn(TableField<R, ?> tableField, Integer width, boolean useAlternativeFilter) {
+        return addColumn(tableField, useAlternativeFilter)
                 .setFlexGrow(0)
                 .setAutoWidth(false)
-                .setWidth("150px");
+                .setWidth(width + "px");
+    }
+
+    public Column<R> addFrozenColumn(TableField<R, ?> tableField, boolean useAlternativeFilter) {
+        return addFixedSizeColumn(tableField, 100, useAlternativeFilter)
+                .setFrozen(true);
+    }
+
+    /**
+     * Adds a fixed route column with a link to the given target view.
+     */
+    public <V extends Component & ThemableLayout> Column<R> addFixedRouteColumn(TableField<R, ?> labelField, Class<V> target) {
+        return addFixedSizeColumn(labelField)
+                .setRenderer(new ComponentRenderer<>(v ->
+                        new RouterLink(Objects.toString(v.get(labelField), ""), target)));
+    }
+
+
+    /**
+     * Adds a fixed route column with a link to the given target view.
+     */
+    public <V extends Component & ThemableLayout> Column<R> addFixedRouteColumn(TableField<R, ?> labelField, Class<V> target, Integer width) {
+        return addFixedSizeColumn(labelField, width)
+                .setRenderer(new ComponentRenderer<>(v ->
+                        new RouterLink(Objects.toString(v.get(labelField), ""), target)));
     }
 
     /**
      * Adds a route column with a link to the given target view.
      */
+    public <V extends Component & ThemableLayout> Column<R> addRouteColumn(TableField<R, ?> labelField, Class<V> target) {
+        return addColumn(labelField)
+                .setRenderer(new ComponentRenderer<>(v ->
+                        new RouterLink(Objects.toString(v.get(labelField), ""), target)));
+    }
+
+    /**
+     * Adds a route column with a link to the given target view filtered for the given id.
+     */
     public <I, V extends Component & HasUrlParameter<I>> Column<R> addRouteColumn(TableField<R, ?> labelField, TableField<R, I> idField, Class<V> target) {
         return addColumn(labelField)
                 .setRenderer(new ComponentRenderer<>(v ->
-                        new RouterLink(String.valueOf(v.get(labelField)), target, v.get(idField))));
+                        new RouterLink(Objects.toString(v.get(labelField), ""), target, v.get(idField))));
+    }
+
+    public <V> Column<R> addTextAreaColumn(TableField<R, V> tableField) {
+        return addColumn(tableField, false)
+                .setRenderer(new ComponentRenderer<>(item -> {
+                    var textArea = new TextArea();
+
+                    textArea.setValue(Objects.toString(tableField.getValue(item), ""));
+                    textArea.setReadOnly(true);
+                    textArea.setWidthFull();
+                    textArea.addClassName("bookkeeper-text-area");
+
+                    return textArea;
+                }))
+                .setSortable(false);
+    }
+
+    public <V> Column<R> addVallterraLinkColumn(TableField<R, V> pathTableField) {
+        return addVallterraLinkColumn(pathTableField, "/");
+    }
+
+    public <V> Column<R> addVallterraLinkColumn(TableField<R, V> slugTableField, String path) {
+        return addExternalLinkColumn(slugTableField, "https://vallterra.wiki" + path);
+    }
+
+    public <V> Column<R> addExternalLinkColumn(TableField<R, V> addVallterraLinkColumn, String urlBase) {
+        return addFixedSizeColumn(addVallterraLinkColumn, false)
+                .setRenderer(new ComponentRenderer<>(item -> {
+                    var path = Objects.toString(addVallterraLinkColumn.getValue(item), "");
+                    var anchor = new Anchor(urlBase + path);
+
+                    anchor.setText(path);
+                    anchor.setTarget("_blank");
+
+                    return anchor;
+                }));
+    }
+
+    public <V> Column<R> addColumn(TableField<R, V> tableField) {
+        return addColumn(tableField, false);
     }
 
     /**
      * Adds a column to the grid with the values provided by the given TableField.
+     *
+     * @param tableField           the TableField to use as the value provider
+     * @param useAlternativeFilter if true, use the alternative filter component. The specific filter component is dependent on the type of the TableField.
      */
     @SuppressWarnings("unchecked")
-    public <V> Column<R> addColumn(TableField<R, V> tableField) {
+    public <V> Column<R> addColumn(TableField<R, V> tableField, boolean useAlternativeFilter) {
         var header = BookkeeperCaseUtils.snakeCaseToTitleCase(tableField.getName());
         var column = addColumn(tableField::getValue, header)
                 .setSortProperty(tableField.getName());
 
-        if (!includeHeaderFilters) {
-            return column;
+        switch (tableField.getType()) {
+            case Class<V> c when c == String.class ->
+                    applyStringHeaderFilter((TableField<R, String>) tableField, useAlternativeFilter, column);
+            case Class<V> c when c == YearToSecond.class -> {
+                applyDurationHeaderFilter((TableField<R, YearToSecond>) tableField, useAlternativeFilter, column);
+
+                column.setRenderer(new TextRenderer<>(t ->
+                                t.getValue(tableField) == null ? null : BookkeeperDateTimeUtils.formatDuration((YearToSecond) t.getValue(tableField))))
+                        .setPartNameGenerator(_ -> "end-aligned clipped")
+                        .setTextAlign(ColumnTextAlign.END)
+                        .setFlexGrow(0)
+                        .setAutoWidth(false)
+                        .setWidth("330px");
+            }
+            case Class<V> c when Temporal.class.isAssignableFrom(c) -> {
+                applyTemporalHeaderFilter((TableField<R, Temporal>) tableField, useAlternativeFilter, column);
+
+                column.setRenderer(temporalFormatLookupMap.get(c).apply((TableField<R, ? extends Temporal>) tableField));
+            }
+            case Class<V> c when Number.class.isAssignableFrom(c) -> {
+                applyNumberHeaderFilter((TableField<R, ? extends Number>) tableField, useAlternativeFilter, column);
+
+                column.setPartNameGenerator(_ -> "end-aligned clipped")
+                        .setTextAlign(ColumnTextAlign.END);
+            }
+            default -> log.warn("Unsupported column type: {}", tableField.getType());
         }
 
-        return switch (tableField.getType()) {
-            case Class<V> c when Number.class.isAssignableFrom(c) -> {
-                FilterComponent<?, ?> numberFilter;
-                if (StringUtils.equalsIgnoreCase(tableField.getName(), "id")) {
-                    numberFilter = new NumberFilter((TableField<R, ? extends Number>) tableField);
-                } else {
-                    numberFilter = new ToggleableNumberRangeFilter((TableField<R, ? extends Number>) tableField);
-                }
+        return column;
+    }
 
-                addHeaderFilter(numberFilter, column);
-                column.setPartNameGenerator(_ -> "end-aligned clipped");
+    private void applyTemporalHeaderFilter(TableField<R, Temporal> tableField, boolean useAlternativeFilter, Column<R> column) {
+        if (!includeHeaderFilters) {
+            return;
+        }
 
-                yield column.setTextAlign(ColumnTextAlign.END);
-            }
-            case Class<V> c when c == String.class -> {
-                var textFilter = new TextFilter((TableField<R, String>) tableField);
-                addHeaderFilter(textFilter, column);
+        FilterComponent<?, ?> filterComponent;
+        if (useAlternativeFilter) {
+            filterComponent = new DateFilter(tableField);
+        } else {
+            filterComponent = new ToggleableDateRangeFilter(tableField);
+        }
 
-                yield column;
-            }
-            default -> column;
-        };
+        addHeaderFilter(filterComponent, column);
+    }
+
+    private void applyStringHeaderFilter(TableField<R, String> tableField, boolean useAlternativeFilter, Column<R> column) {
+        if (!includeHeaderFilters) {
+            return;
+        }
+
+        FilterComponent<?, ?> filterComponent;
+        if (useAlternativeFilter) {
+            filterComponent = new MultiComboBoxFilter<>(tableField);
+        } else {
+            filterComponent = new TextFilter(tableField);
+        }
+
+        addHeaderFilter(filterComponent, column);
+    }
+
+    private void applyDurationHeaderFilter(TableField<R, YearToSecond> tableField, boolean useAlternativeFilter, Column<R> column) {
+        if (!includeHeaderFilters) {
+            return;
+        }
+
+        FilterComponent<?, ?> durationFilter;
+        if (useAlternativeFilter) {
+            durationFilter = new DurationFilter(tableField);
+        } else {
+            durationFilter = new ToggleableDurationRangeFilter(tableField);
+        }
+
+        addHeaderFilter(durationFilter, column);
+    }
+
+    private void applyNumberHeaderFilter(TableField<R, ? extends Number> tableField, boolean useAlternativeFilter, Column<R> column) {
+        if (!includeHeaderFilters) {
+            return;
+        }
+
+        FilterComponent<?, ?> numberFilter;
+        if (useAlternativeFilter) {
+            numberFilter = new NumberFilter(tableField);
+        } else {
+            numberFilter = new ToggleableNumberRangeFilter(tableField);
+        }
+
+        addHeaderFilter(numberFilter, column);
     }
 
     private <C extends Component, V> void addHeaderFilter(FilterComponent<C, V> numberFilter, Column<R> column) {
@@ -253,28 +459,35 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
                 .setResizable(true);
     }
 
-    public Column<R> addDetailsToggleColumn() {
-        return addToggleableIconButtonColumn(VaadinIcon.ANGLE_RIGHT, VaadinIcon.ANGLE_DOWN,
+    public <V> Column<R> addDetailsToggleColumn(TableField<R, V> tableField) {
+        return addDetailsToggleColumn(tableField, false);
+    }
+
+    public <V> Column<R> addDetailsToggleColumn(TableField<R, V> tableField, boolean useAlternativeFilter) {
+        return addToggleableIconButtonColumn(tableField, useAlternativeFilter,
+                VaadinIcon.ANGLE_RIGHT, VaadinIcon.ANGLE_DOWN,
                 item -> () -> setDetailsVisible(item, !isDetailsVisible(item)),
                 this::isDetailsVisible)
                 .setFlexGrow(0)
                 .setAutoWidth(false)
-                .setWidth("68px")
+                .setWidth("100px")
                 .setFrozen(true);
     }
 
-    public Column<R> addToggleableIconButtonColumn(IconFactory restIconFactory, IconFactory activeIconFactory, Function<R, Runnable> clickListener, Function<R, Boolean> activeCondition) {
-        return addButtonColumn(new ComponentRenderer<>(item -> {
-            var button = new Button();
+    public <V> Column<R> addToggleableIconButtonColumn(TableField<R, V> tableField, boolean useAlternativeFilter, IconFactory restIconFactory, IconFactory activeIconFactory, Function<R, Runnable> clickListener, Function<R, Boolean> activeCondition) {
+        return addColumn(tableField, useAlternativeFilter)
+                .setRenderer(new ComponentRenderer<>(item -> {
+                    var button = new Button(Objects.toString(tableField.getValue(item), ""));
 
-            button.setIcon(activeCondition.apply(item) ? activeIconFactory.create() : restIconFactory.create());
-            button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            button.addClickListener(_ -> {
-                clickListener.apply(item).run();
-            });
+                    button.setIcon(activeCondition.apply(item) ? activeIconFactory.create() : restIconFactory.create());
+                    button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+                    button.addThemeName("width-full body-text-label");
+                    button.addClickListener(_ -> {
+                        clickListener.apply(item).run();
+                    });
 
-            return button;
-        }));
+                    return button;
+                }));
     }
 
     public Column<R> addIconButtonColumn(Icon icon, Function<R, Runnable> clickListener) {

@@ -87,7 +87,6 @@ public class AdventureDetailView extends VerticalLayout implements HasUrlParamet
                 loadCharacters(adventure);
             } else {
                 // Adventure not found, redirect to adventures view
-                getUI().ifPresent(ui -> ui.navigate(AdventuresView.class));
                 return;
             }
         } else {
@@ -107,17 +106,16 @@ public class AdventureDetailView extends VerticalLayout implements HasUrlParamet
         formLayout.setSpacing(true);
         formLayout.setPadding(true);
         
-        var saveButton = new Button("Save", e -> saveAdventure());
-        var cancelButton = new Button("Cancel", e -> getUI().ifPresent(ui -> ui.navigate(AdventuresView.class)));
-        var buttonLayout = new HorizontalLayout(saveButton, cancelButton);
-        
+        var saveButton = new Button("Save", _ -> saveAdventure());
+        var buttonLayout = new HorizontalLayout(saveButton);
+
         var adventureLayout = new VerticalLayout(title, formLayout, buttonLayout);
         adventureLayout.setSpacing(true);
         
         if (adventure.getId() != null) {
             // Show characters section for existing adventures
             var charactersTitle = new H3("Characters");
-            var addCharacterButton = new Button("Add Character", VaadinIcon.PLUS.create(), e -> addCharacterDialog());
+            var addCharacterButton = new Button("Add Character", VaadinIcon.PLUS.create(), _ -> addCharacterDialog());
             var charactersHeader = new HorizontalLayout(charactersTitle, addCharacterButton);
             charactersHeader.setWidthFull();
             charactersHeader.setJustifyContentMode(JustifyContentMode.BETWEEN);
@@ -133,7 +131,7 @@ public class AdventureDetailView extends VerticalLayout implements HasUrlParamet
     
     private void fillAdventureForm(Adventure adventure) {
         if (adventure.getQuestId() != null) {
-            questRepository.findById(adventure.getQuestId().intValue()).ifPresent(questComboBox::setValue);
+            questRepository.findById(adventure.getQuestId()).ifPresent(questComboBox::setValue);
         }
         slugField.setValue(adventure.getSlug() != null ? adventure.getSlug() : "");
         notesField.setValue(adventure.getNotes() != null ? adventure.getNotes() : "");
@@ -143,7 +141,7 @@ public class AdventureDetailView extends VerticalLayout implements HasUrlParamet
     private void saveAdventure() {
         Quest selectedQuest = questComboBox.getValue();
         if (selectedQuest != null) {
-            adventure.setQuestId(selectedQuest.getId().longValue());
+            adventure.setQuestId(selectedQuest.getId());
         }
         
         adventure.setSlug(slugField.getValue());
@@ -156,7 +154,6 @@ public class AdventureDetailView extends VerticalLayout implements HasUrlParamet
         }
         
         adventureRepository.save(adventure);
-        getUI().ifPresent(ui -> ui.navigate(AdventuresView.class));
     }
     
     private void configureCharactersGrid() {
@@ -176,7 +173,7 @@ public class AdventureDetailView extends VerticalLayout implements HasUrlParamet
         // Add a remove button column
         charactersGrid.addComponentColumn(characterAdventure -> {
             Button removeButton = new Button("Remove", VaadinIcon.TRASH.create());
-            removeButton.addClickListener(e -> {
+            removeButton.addClickListener(_ -> {
                 characterAdventureRepository.deleteById(characterAdventure.getId());
                 loadCharacters(adventure);
             });
@@ -197,6 +194,6 @@ public class AdventureDetailView extends VerticalLayout implements HasUrlParamet
     }
     
     private void addCharacterDialog() {
-        return; // TODO: Implement character selection dialog
+        // TODO: Implement character selection dialog
     }
 }

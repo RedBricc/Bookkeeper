@@ -49,7 +49,7 @@ public interface AdventureRepository {
      * @param questId the quest ID
      * @return a list of adventures for the given quest
      */
-    List<Adventure> findByQuestId(@NotNull Long questId);
+    List<Adventure> findByQuestId(@NotNull Integer questId);
 
     /**
      * Find adventures by slug (partial match).

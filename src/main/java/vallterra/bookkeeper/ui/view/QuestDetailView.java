@@ -100,8 +100,8 @@ public class QuestDetailView extends VerticalLayout implements HasUrlParameter<I
         formLayout.setSpacing(true);
         formLayout.setPadding(true);
         
-        var saveButton = new Button("Save", e -> saveQuest());
-        var cancelButton = new Button("Cancel", e -> getUI().ifPresent(ui -> ui.navigate(QuestsView.class)));
+        var saveButton = new Button("Save", _ -> saveQuest());
+        var cancelButton = new Button("Cancel", _ -> getUI().ifPresent(ui -> ui.navigate(QuestsView.class)));
         var buttonLayout = new HorizontalLayout(saveButton, cancelButton);
         
         var questLayout = new VerticalLayout(title, formLayout, buttonLayout);
@@ -110,7 +110,7 @@ public class QuestDetailView extends VerticalLayout implements HasUrlParameter<I
         if (quest.getId() != null) {
             // Show adventures section for existing quests
             var adventuresTitle = new H3("Adventures");
-            var addAdventureButton = new Button("New Adventure", VaadinIcon.PLUS.create(), e -> createNewAdventure());
+            var addAdventureButton = new Button("New Adventure", VaadinIcon.PLUS.create(), _ -> createNewAdventure());
             var adventuresHeader = new HorizontalLayout(adventuresTitle, addAdventureButton);
             adventuresHeader.setWidthFull();
             adventuresHeader.setJustifyContentMode(JustifyContentMode.BETWEEN);
@@ -175,11 +175,11 @@ public class QuestDetailView extends VerticalLayout implements HasUrlParameter<I
     
     private void loadAdventures(Quest quest) {
         if (quest.getId() != null) {
-            adventuresGrid.setItems(adventureRepository.findByQuestId(quest.getId().longValue()));
+            adventuresGrid.setItems(adventureRepository.findByQuestId(quest.getId()));
         }
     }
     
     private void createNewAdventure() {
-        return; // TODO: Implement adventure creation logic
+        // TODO: Implement adventure creation logic
     }
 }

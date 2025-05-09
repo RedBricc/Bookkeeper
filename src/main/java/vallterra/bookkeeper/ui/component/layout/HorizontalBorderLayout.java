@@ -1,4 +1,4 @@
-package vallterra.bookkeeper.ui.component.common;
+package vallterra.bookkeeper.ui.component.layout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;

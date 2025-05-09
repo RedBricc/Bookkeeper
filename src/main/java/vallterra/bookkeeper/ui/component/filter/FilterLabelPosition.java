@@ -4,5 +4,6 @@ public enum FilterLabelPosition {
     NONE,
     TOP,
     PLACEHOLDER,
-    BOTTOM
+    BOTTOM,
+    RIGHT
 }

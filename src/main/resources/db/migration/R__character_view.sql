@@ -23,9 +23,6 @@ select
     c.notes,
     c.vallterra_user_id,
     vu.username,
-    vu.prefers_dark,
-    vu.prefers_large,
-    vu.allow_large,
     vu.player_name,
     ca.adventure_count
 from character c

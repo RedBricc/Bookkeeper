@@ -1,3 +1,25 @@
 :host([theme~='icon']:not([theme~='tertiary-inline'])) {
     padding: 0;
 }
+
+:host([theme~='width-full']) {
+    max-width: 100%;
+    width: 100%;
+
+    [part='prefix'] {
+        margin-right: auto;
+    }
+}
+
+:host([theme~='body-text-label']) [part='label'] {
+    color: var(--lumo-body-text-color);
+}
+
+:host([theme~='filter']) {
+    color: rgba(209, 227, 250, 0.58);
+}
+
+
+:host([theme~='filter']:hover) {
+    color: var(--lumo-body-text-color);
+}

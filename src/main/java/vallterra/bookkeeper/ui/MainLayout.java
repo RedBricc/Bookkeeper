@@ -17,7 +17,10 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
-import vallterra.bookkeeper.ui.view.*;
+import vallterra.bookkeeper.ui.view.CharactersView;
+import vallterra.bookkeeper.ui.view.HomeView;
+import vallterra.bookkeeper.ui.view.PointRewardsView;
+import vallterra.bookkeeper.ui.view.QuestsView;
 
 public class MainLayout extends AppLayout {
 
@@ -92,10 +95,9 @@ public class MainLayout extends AppLayout {
         pages.getStyle().set("flex", "1");
 
         pages.add(new SideNavItem("Home", HomeView.class, VaadinIcon.HOME.create()));
-        pages.add(new SideNavItem("Quests", QuestsView.class, VaadinIcon.ABACUS.create()));
-        pages.add(new SideNavItem("Adventures", AdventuresView.class, VaadinIcon.ROAD.create()));
+        pages.add(new SideNavItem("Quests", QuestsView.class, VaadinIcon.ROAD.create()));
         pages.add(new SideNavItem("Characters", CharactersView.class, VaadinIcon.USERS.create()));
-        pages.add(new SideNavItem("Notes", NotesView.class, VaadinIcon.PENCIL.create()));
+        pages.add(new SideNavItem("Rewards", PointRewardsView.class, VaadinIcon.TROPHY.create()));
 
         return pages;
     }

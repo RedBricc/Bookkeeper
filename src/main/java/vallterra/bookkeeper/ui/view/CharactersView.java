@@ -19,9 +19,9 @@ import static org.jooq.generated.tables.VCharacter.V_CHARACTER;
 public class CharactersView extends BookkeeperGridLayout<VCharacterRecord> {
 
     public CharactersView() {
+        super(V_CHARACTER, "Characters");
         setSizeFull();
 
-        configure(V_CHARACTER, "Characters");
         configureGrid();
         configureToolbar();
 
@@ -30,11 +30,10 @@ public class CharactersView extends BookkeeperGridLayout<VCharacterRecord> {
     }
 
     private void configureGrid() {
-        grid().addDetailsToggleColumn();
-        grid().addFixedSizeColumn(V_CHARACTER.ID).setWidth("90px");
+        grid().addDetailsToggleColumn(V_CHARACTER.ID, true);
         grid().addRouteColumn(V_CHARACTER.NAME, V_CHARACTER.ID, CharacterDetailView.class);
         grid().addFixedSizeColumn(V_CHARACTER.LEVEL);
-        grid().addColumn(V_CHARACTER.MAIN_CLASS);
+        grid().addFixedSizeColumn(V_CHARACTER.MAIN_CLASS, true);
         grid().addFixedSizeColumn(V_CHARACTER.ARMOR_CLASS)
                 .setRenderer(new FormattedTextRenderer<>(VCharacterRecord::getArmorClass, "%d AC"));
         grid().addFixedSizeColumn(V_CHARACTER.INITIATIVE)
@@ -46,15 +45,14 @@ public class CharactersView extends BookkeeperGridLayout<VCharacterRecord> {
     }
 
     private void configureToolbar() {
-        var addCharacterButton = new Button("New Character", VaadinIcon.PLUS.create());
-        addCharacterButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        addActionComponent(addCharacterButton);
+        var newCharacterButton = new Button("New Character", VaadinIcon.PLUS.create());
+        newCharacterButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addActionComponent(newCharacterButton);
     }
 
     private BookkeeperGridLayout<VCharacterRecord> createDetailsLayout(VCharacterRecord character) {
-        var detailsLayout = new BookkeeperGridLayout<VCharacterRecord>();
+        var detailsLayout = new BookkeeperGridLayout<>(V_CHARACTER, "Character details", false, DisplayMode.DETAILS);
         detailsLayout.setSizeFull();
-        detailsLayout.configure(V_CHARACTER, "Character details", false, DisplayMode.DETAILS);
 
         detailsLayout.grid().addFixedCondition(V_CHARACTER.ID.eq(character.getId()));
 
@@ -64,8 +62,8 @@ public class CharactersView extends BookkeeperGridLayout<VCharacterRecord> {
         detailsLayout.grid().addColumn(V_CHARACTER.LANGUAGES);
         detailsLayout.grid().addColumn(V_CHARACTER.TOOLS);
         detailsLayout.grid().addColumn(V_CHARACTER.BACKGROUND);
-        detailsLayout.grid().addColumn(V_CHARACTER.POINTS);
-        detailsLayout.grid().addColumn(V_CHARACTER.ADVENTURE_COUNT);
+        detailsLayout.grid().addFixedSizeColumn(V_CHARACTER.POINTS);
+        detailsLayout.grid().addFixedSizeColumn(V_CHARACTER.ADVENTURE_COUNT);
 
         return detailsLayout;
     }
