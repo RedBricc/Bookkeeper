@@ -68,6 +68,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./certs/bookkeeper:/etc/nginx/certs/bookkeeper:ro
       - ./certs/wiki:/etc/nginx/certs/wiki:ro
