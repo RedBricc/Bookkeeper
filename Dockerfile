@@ -53,6 +53,6 @@ USER spring:spring
 ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 9696
 HEALTHCHECK --interval=30s --retries=3 \
-  CMD wget -q --spider https://127.0.0.1:9696/actuator/health || exit 1
+  CMD curl -f -s https://127.0.0.1:9696/actuator/health || exit 1
 
 ENTRYPOINT ["java","-jar","/app/app.jar","--spring.profiles.active=prod"]

@@ -55,7 +55,7 @@ services:
     networks: [ web ]
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "https://localhost:9696/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "-s", "https://127.0.0.1:9696/actuator/health" ]
       interval: 30s
       retries: 3
   nginx:
