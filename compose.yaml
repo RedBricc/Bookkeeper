@@ -52,7 +52,6 @@ services:
         condition: service_completed_successfully
     ports:
       - "9696:9696"
-      - "9697:9697"
     networks: [ web ]
     restart: unless-stopped
     healthcheck:
