@@ -12,7 +12,8 @@ services:
       POSTGRES_DB: bookkeeper
       POSTGRES_USER: bookkeeper
       POSTGRES_PASSWORD: admin
-    ports: [ "4321:5432" ]
+    ports:
+      - "4321:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d:ro,Z
@@ -49,7 +50,8 @@ services:
     depends_on:
       tests:
         condition: service_completed_successfully
-    ports: [ "9696:9696" ]
+    ports:
+      - "9696:9696"
     networks: [ web ]
     restart: unless-stopped
     healthcheck:
