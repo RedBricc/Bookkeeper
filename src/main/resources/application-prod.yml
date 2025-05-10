@@ -5,5 +5,5 @@ spring:
     password: admin
 logging:
   level:
-    web: debug
+    web: info
     sql: info
