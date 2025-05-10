@@ -45,6 +45,8 @@ FROM eclipse-temurin:${JAVA_VERSION}-jre AS runtime
 
 COPY --from=build /workspace/build/libs/*-SNAPSHOT.jar /app/app.jar
 COPY /certs/bookkeeper /app/certs/bookkeeper
+COPY /certs/bookkeeper/cert.crt /usr/local/share/ca-certificates/bookkeeper.crt
+RUN update-ca-certificates
 
 WORKDIR /app
 RUN useradd -r -u 10001 spring && chown spring:spring /app/app.jar
@@ -53,6 +55,6 @@ USER spring:spring
 ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 9696
 HEALTHCHECK --interval=30s --retries=3 \
-  CMD curl -f -s https://127.0.0.1:9696/actuator/health || exit 1
+  CMD wget -q --spider https://127.0.0.1:9696/actuator/health || exit 1
 
 ENTRYPOINT ["java","-jar","/app/app.jar","--spring.profiles.active=prod"]
