@@ -26,9 +26,9 @@ services:
     image: gradle:8-jdk24
     working_dir: /workspace
     command: >
-      gradle clean jooqCodegen flywayMigrate test bootJar
+      gradle clean jooqCodegen test
       -Dgen.db.url=jdbc:postgresql://host.docker.internal:4321/bookkeeper_gen
-      --no-daemon --stacktrace
+      --no-daemon
     volumes:
       - .:/workspace
       - node-cache:/home/gradle/.npm
@@ -49,6 +49,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runtime
     depends_on:
       tests:
         condition: service_completed_successfully
