@@ -62,8 +62,12 @@ services:
     depends_on:
       bookkeeper:
         condition: service_healthy
-    ports: [ "80:80", "443:443" ]
+    ports: 
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certs/bookkeeper:/etc/nginx/certs/bookkeeper:ro
+      - ./certs/wiki:/etc/nginx/certs/wiki:ro
     networks: [ web ]
     restart: unless-stopped
