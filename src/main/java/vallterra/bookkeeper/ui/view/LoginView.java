@@ -1,7 +1,10 @@
 package vallterra.bookkeeper.ui.view;
 
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -25,7 +28,14 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
         login.setAction("login");
 
-        add(new H1("Bookkeeper"), login);
+        var bookIcon = VaadinIcon.BOOK.create();
+        bookIcon.getStyle().setFontSize("1.25rem");
+
+        var titleContainer = new HorizontalLayout(bookIcon, new H1("Bookkeeper"));
+        titleContainer.setPadding(false);
+        titleContainer.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        add(titleContainer, login);
     }
 
     @Override
