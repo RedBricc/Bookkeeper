@@ -1,7 +1,5 @@
 volumes:
   pgdata:
-  gradle-cache:
-  node-cache:
 
 networks:
   web:
@@ -23,16 +21,14 @@ services:
       interval: 5s
       retries: 5
   tests:
-    image: gradle:8-jdk24
-    working_dir: /workspace
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
     command: >
-      gradle clean jooqCodegen test
+      gradle test --no-daemon
       -Dgen.db.url=jdbc:postgresql://host.docker.internal:4321/bookkeeper_gen
-      --no-daemon
     volumes:
-      - .:/workspace
-      - node-cache:/home/gradle/.npm
-      - gradle-cache:/home/gradle/.gradle
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       TESTCONTAINERS_RYUK_DISABLED: "true"
