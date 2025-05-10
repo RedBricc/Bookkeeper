@@ -43,7 +43,6 @@ out/
 /src/main/bundles/
 *.log
 *.jfr
-/package.json
 /package-lock.json
 /tsconfig.json
 /types.d.ts
