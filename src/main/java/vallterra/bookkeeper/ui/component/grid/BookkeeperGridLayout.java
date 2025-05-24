@@ -16,6 +16,7 @@ import org.jooq.Table;
 import org.springframework.validation.annotation.Validated;
 import vallterra.bookkeeper.ui.component.filter.FilterComponent;
 import vallterra.bookkeeper.ui.component.layout.VerticalBorderLayout;
+import vallterra.bookkeeper.ui.data.ContextAccess;
 
 @Validated
 public class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
@@ -27,14 +28,14 @@ public class BookkeeperGridLayout<R extends Record> extends VerticalLayout {
     private final HorizontalLayout actions;
     private final BookkeeperGrid<R> grid;
 
-    public BookkeeperGridLayout(@NotNull Table<R> table, @NotBlank String title) {
-        this(table, title, true, DisplayMode.DEFAULT);
+    public BookkeeperGridLayout(@NotNull Table<R> table, @NotNull ContextAccess contextAccess, @NotBlank String title) {
+        this(table, contextAccess, title, true, DisplayMode.DEFAULT);
     }
 
-    public BookkeeperGridLayout(@NotNull Table<R> table, @NotBlank String title, boolean includeHeaderFilters, @NotNull DisplayMode displayMode) {
+    public BookkeeperGridLayout(@NotNull Table<R> table, @NotNull ContextAccess contextAccess, @NotBlank String title, boolean includeHeaderFilters, @NotNull DisplayMode displayMode) {
         setSizeFull();
 
-        grid = new BookkeeperGrid<>(table, includeHeaderFilters, DisplayMode.DEFAULT.equals(displayMode));
+        grid = new BookkeeperGrid<>(table, contextAccess, includeHeaderFilters, DisplayMode.DEFAULT.equals(displayMode));
 
         var refreshButton = new Button(VaadinIcon.REFRESH.create());
         refreshButton.setTooltipText("Refresh");

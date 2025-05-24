@@ -12,6 +12,7 @@ import org.jooq.generated.tables.records.VAdventureRecord;
 import org.jooq.generated.tables.records.VQuestRecord;
 import vallterra.bookkeeper.ui.MainLayout;
 import vallterra.bookkeeper.ui.component.grid.BookkeeperGridLayout;
+import vallterra.bookkeeper.ui.data.ContextAccess;
 
 import java.util.List;
 
@@ -22,15 +23,15 @@ import static org.jooq.generated.tables.VQuest.V_QUEST;
 @PermitAll
 public class QuestsView extends BookkeeperGridLayout<VQuestRecord> {
 
-    public QuestsView() {
-        super(V_QUEST, "Quests");
+    public QuestsView(ContextAccess contextAccess) {
+        super(V_QUEST, contextAccess, "Quests");
         setSizeFull();
 
         configureGrid();
         configureToolbar();
 
         grid().setDetailsVisibleOnClick(false);
-        grid().setItemDetailsRenderer(new ComponentRenderer<>(this::createDetailsLayout));
+        grid().setItemDetailsRenderer(new ComponentRenderer<>(r -> createDetailsLayout(r, contextAccess)));
         grid().setPartNameGenerator(quest -> {
             if (quest.getCompletedAt() != null) {
                 return "completed";
@@ -62,8 +63,8 @@ public class QuestsView extends BookkeeperGridLayout<VQuestRecord> {
         addActionComponent(newQuestButton);
     }
 
-    private BookkeeperGridLayout<VAdventureRecord> createDetailsLayout(VQuestRecord quest) {
-        var detailsLayout = new BookkeeperGridLayout<>(V_ADVENTURE, "Adventures", false, DisplayMode.DETAILS);
+    private BookkeeperGridLayout<VAdventureRecord> createDetailsLayout(VQuestRecord quest, ContextAccess contextAccess) {
+        var detailsLayout = new BookkeeperGridLayout<>(V_ADVENTURE, contextAccess, "Adventures", false, DisplayMode.DETAILS);
         detailsLayout.setSizeFull();
 
         detailsLayout.grid().addFixedCondition(V_ADVENTURE.QUEST_ID.eq(quest.getId()));

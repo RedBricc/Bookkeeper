@@ -9,6 +9,7 @@ import jakarta.annotation.security.PermitAll;
 import org.jooq.generated.tables.records.VCharacterRecord;
 import vallterra.bookkeeper.ui.MainLayout;
 import vallterra.bookkeeper.ui.component.grid.BookkeeperGridLayout;
+import vallterra.bookkeeper.ui.data.ContextAccess;
 import vallterra.bookkeeper.ui.renderer.text.FormattedTextRenderer;
 import vallterra.bookkeeper.ui.renderer.text.PlusPrefixedNumberTextRenderer;
 
@@ -18,15 +19,15 @@ import static org.jooq.generated.tables.VCharacter.V_CHARACTER;
 @PermitAll
 public class CharactersView extends BookkeeperGridLayout<VCharacterRecord> {
 
-    public CharactersView() {
-        super(V_CHARACTER, "Characters");
+    public CharactersView(ContextAccess contextAccess) {
+        super(V_CHARACTER, contextAccess, "Characters");
         setSizeFull();
 
         configureGrid();
         configureToolbar();
 
         grid().setDetailsVisibleOnClick(false);
-        grid().setItemDetailsRenderer(new ComponentRenderer<>(this::createDetailsLayout));
+        grid().setItemDetailsRenderer(new ComponentRenderer<>(r -> createDetailsLayout(r, contextAccess)));
     }
 
     private void configureGrid() {
@@ -50,8 +51,8 @@ public class CharactersView extends BookkeeperGridLayout<VCharacterRecord> {
         addActionComponent(newCharacterButton);
     }
 
-    private BookkeeperGridLayout<VCharacterRecord> createDetailsLayout(VCharacterRecord character) {
-        var detailsLayout = new BookkeeperGridLayout<>(V_CHARACTER, "Character details", false, DisplayMode.DETAILS);
+    private BookkeeperGridLayout<VCharacterRecord> createDetailsLayout(VCharacterRecord character, ContextAccess contextAccess) {
+        var detailsLayout = new BookkeeperGridLayout<>(V_CHARACTER, contextAccess, "Character details", false, DisplayMode.DETAILS);
         detailsLayout.setSizeFull();
 
         detailsLayout.grid().addFixedCondition(V_CHARACTER.ID.eq(character.getId()));

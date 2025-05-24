@@ -7,6 +7,7 @@ import jakarta.annotation.security.PermitAll;
 import org.jooq.generated.tables.records.PointRewardRecord;
 import vallterra.bookkeeper.ui.MainLayout;
 import vallterra.bookkeeper.ui.component.grid.BookkeeperGridLayout;
+import vallterra.bookkeeper.ui.data.ContextAccess;
 
 import java.util.List;
 
@@ -15,8 +16,8 @@ import static org.jooq.generated.tables.PointReward.POINT_REWARD;
 @Route(value = "point-rewards", layout = MainLayout.class)
 @PermitAll
 public class PointRewardsView extends BookkeeperGridLayout<PointRewardRecord> {
-    public PointRewardsView() {
-        super(POINT_REWARD, "Point Rewards");
+    public PointRewardsView(ContextAccess contextAccess) {
+        super(POINT_REWARD, contextAccess, "Point Rewards");
         setSizeFull();
 
         configureGrid();

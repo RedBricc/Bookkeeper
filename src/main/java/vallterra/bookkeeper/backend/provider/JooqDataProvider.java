@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jooq.*;
 import org.jooq.Record;
 import org.springframework.validation.annotation.Validated;
-import vallterra.bookkeeper.ui.data.Access;
+import vallterra.bookkeeper.ui.data.ContextAccess;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +33,8 @@ public class JooqDataProvider<R extends Record, F>
     private final Map<UUID, Condition> conditionMap;
     private Condition fixedConditions;
 
-    public JooqDataProvider(Table<R> table) {
-        this.db = Access.db();
+    public JooqDataProvider(Table<R> table, ContextAccess contextAccess) {
+        this.db = contextAccess.db();
         this.table = table;
         conditionMap = new HashMap<>();
         fixedConditions = null;
@@ -119,12 +119,22 @@ public class JooqDataProvider<R extends Record, F>
      * Clears all conditions and refreshes the data.
      */
     public void clearConditions() {
+        clearConditions(true);
+    }
+
+    /**
+     * Clears all conditions and optionally refreshes the data.
+     */
+    public void clearConditions(boolean refresh) {
         conditionMap.clear();
-        refreshAll();
+        if (refresh) {
+            refreshAll();
+        }
     }
 
     /**
      * Checks if there are any conditions applied to the data provider.
+     * This does not include fixed conditions added with {@link #addFixedCondition(Condition)}.
      *
      * @return true if there are conditions, false otherwise
      */
@@ -135,11 +145,23 @@ public class JooqDataProvider<R extends Record, F>
     /**
      * Adds fixed condition to the data provider.
      * This condition is always applied to the data provider and will not be cleared by {@link #clearConditions()}.
+     * This will not refresh the data automatically as fixed conditions are typically applied during initialization.
      *
      * @param condition the fixed condition to set
      */
     public void addFixedCondition(Condition condition) {
         this.fixedConditions = fixedConditions == null ? condition : fixedConditions.and(condition);
+    }
+
+    /**
+     * Clear all fixed conditions and optionally refresh the data.
+     * This will not affect the conditions registered with {@link #registerCondition(Condition)}.
+     */
+    public void clearFixedConditions(boolean refresh) {
+        this.fixedConditions = null;
+        if (refresh) {
+            refreshAll();
+        }
     }
 
 }

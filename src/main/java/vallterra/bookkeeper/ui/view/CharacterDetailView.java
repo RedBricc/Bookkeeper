@@ -171,7 +171,7 @@ public class CharacterDetailView extends VerticalLayout implements HasUrlParamet
 
     private void fillCharacterForm(Character character) {
         if (character.getWikiUserId() != null) {
-            vallterraUserRepository.findById(character.getWikiUserId().intValue()).ifPresent(userComboBox::setValue);
+            vallterraUserRepository.findById(character.getWikiUserId()).ifPresent(userComboBox::setValue);
         }
         nameField.setValue(character.getName() != null ? character.getName() : "");
         raceField.setValue(character.getRace() != null ? character.getRace() : "");
@@ -197,7 +197,7 @@ public class CharacterDetailView extends VerticalLayout implements HasUrlParamet
     private void saveCharacter() {
         VallterraUser selectedUser = userComboBox.getValue();
         if (selectedUser != null) {
-            character.setWikiUserId(selectedUser.getId().longValue());
+            character.setWikiUserId(selectedUser.getId());
         }
 
         character.setName(nameField.getValue());

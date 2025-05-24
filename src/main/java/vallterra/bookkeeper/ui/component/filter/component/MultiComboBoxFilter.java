@@ -10,7 +10,7 @@ import org.jooq.Record;
 import org.jooq.TableField;
 import vallterra.bookkeeper.ui.component.filter.FilterComponent;
 import vallterra.bookkeeper.ui.component.filter.FilterLabelPosition;
-import vallterra.bookkeeper.ui.data.Access;
+import vallterra.bookkeeper.ui.data.ContextAccess;
 
 import java.util.Set;
 import java.util.function.Supplier;
@@ -24,15 +24,15 @@ public class MultiComboBoxFilter<T> extends MultiSelectComboBox<T>
     @Setter
     private ValueChangeMode valueChangeMode;
 
-    public <R extends Record> MultiComboBoxFilter(TableField<R, T> field) {
-        this(field, FilterLabelPosition.TOP);
+    public <R extends Record> MultiComboBoxFilter(TableField<R, T> field, ContextAccess contextAccess) {
+        this(field, contextAccess, FilterLabelPosition.TOP);
     }
 
-    public <R extends Record> MultiComboBoxFilter(TableField<R, T> field, FilterLabelPosition filterLabelPosition) {
+    public <R extends Record> MultiComboBoxFilter(TableField<R, T> field, ContextAccess contextAccess, FilterLabelPosition filterLabelPosition) {
         super();
         setupLabel(field, filterLabelPosition);
 
-        setItems(field);
+        setItems(field, contextAccess);
 
         this.conditionSupplier = () -> buildCondition(field);
         this.setValueChangeMode(ValueChangeMode.LAZY);
@@ -61,8 +61,8 @@ public class MultiComboBoxFilter<T> extends MultiSelectComboBox<T>
         super.clear();
     }
 
-    private <R extends Record> void setItems(TableField<R, T> field) {
-        var items = Access.db().selectDistinct(field)
+    private <R extends Record> void setItems(TableField<R, T> field, ContextAccess contextAccess) {
+        var items = contextAccess.db().selectDistinct(field)
                 .from(field.getTable())
                 .fetchInto(field.getType());
         this.setItems(items);

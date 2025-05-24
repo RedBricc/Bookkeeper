@@ -9,7 +9,7 @@ alter table vallterra_user
 create table wiki_user
 (
     id                    serial primary key,
-    vallterra_user_id     bigint  not null references vallterra_user,
+    vallterra_user_id     int  not null references vallterra_user,
     p_type                text      default 'p'::text,
     username              text not null unique,
     password              text not null
@@ -18,7 +18,7 @@ create table wiki_user
 create index idx_wiki_user_vallterra_user_id on wiki_user (vallterra_user_id);
 
 alter table character
-    add column wiki_user_id bigint references wiki_user;
+    add column wiki_user_id int references wiki_user;
 
 alter table character
       drop column vallterra_user_id;

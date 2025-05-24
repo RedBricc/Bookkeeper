@@ -36,6 +36,7 @@ import vallterra.bookkeeper.backend.util.BookkeeperDateTimeUtils;
 import vallterra.bookkeeper.ui.component.filter.FilterComponent;
 import vallterra.bookkeeper.ui.component.filter.component.*;
 import vallterra.bookkeeper.ui.component.filter.event.FilterEvent;
+import vallterra.bookkeeper.ui.data.ContextAccess;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -53,6 +54,8 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
 
     private final boolean includeHeaderFilters;
     private final boolean sortable;
+
+    private final ContextAccess contextAccess;
 
     private final JooqDataProvider<R, Record> dataProvider;
     private final List<Consumer<FilterEvent>> filterSetListeners;
@@ -74,21 +77,23 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
                     t.getValue(tableField) == null ? null : ((OffsetDateTime) t.getValue(tableField)).format(offsetDateTimeFormatter))
     );
 
-    public BookkeeperGrid(Table<R> table) {
-        this(table, true, true);
+    public BookkeeperGrid(Table<R> table, ContextAccess contextAccess) {
+        this(table, contextAccess, true, true);
     }
 
-    public BookkeeperGrid(Table<R> table, boolean includeHeaderFilters) {
-        this(table, includeHeaderFilters, true);
+    public BookkeeperGrid(Table<R> table, ContextAccess contextAccess, boolean includeHeaderFilters) {
+        this(table, contextAccess, includeHeaderFilters, true);
     }
 
-    public BookkeeperGrid(Table<R> table, boolean includeHeaderFilters, boolean sortable) {
+    public BookkeeperGrid(Table<R> table, ContextAccess contextAccess, boolean includeHeaderFilters, boolean sortable) {
         super();
 
         this.includeHeaderFilters = includeHeaderFilters;
         this.sortable = sortable;
 
-        this.dataProvider = new JooqDataProvider<>(table);
+        this.contextAccess = contextAccess;
+
+        this.dataProvider = new JooqDataProvider<>(table, contextAccess);
         this.filterSetListeners = new ArrayList<>();
         this.allFiltersClearListeners = new ArrayList<>();
         this.clearConditionsListeners = new ArrayList<>();
@@ -344,7 +349,7 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
 
         switch (tableField.getType()) {
             case Class<V> c when c == String.class ->
-                    applyStringHeaderFilter((TableField<R, String>) tableField, useAlternativeFilter, column);
+                    applyStringHeaderFilter((TableField<R, String>) tableField, contextAccess, useAlternativeFilter, column);
             case Class<V> c when c == YearToSecond.class -> {
                 applyDurationHeaderFilter((TableField<R, YearToSecond>) tableField, useAlternativeFilter, column);
 
@@ -388,14 +393,14 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
         addHeaderFilter(filterComponent, column);
     }
 
-    private void applyStringHeaderFilter(TableField<R, String> tableField, boolean useAlternativeFilter, Column<R> column) {
+    private void applyStringHeaderFilter(TableField<R, String> tableField, ContextAccess contextAccess, boolean useAlternativeFilter, Column<R> column) {
         if (!includeHeaderFilters) {
             return;
         }
 
         FilterComponent<?, ?> filterComponent;
         if (useAlternativeFilter) {
-            filterComponent = new MultiComboBoxFilter<>(tableField);
+            filterComponent = new MultiComboBoxFilter<>(tableField, contextAccess);
         } else {
             filterComponent = new TextFilter(tableField);
         }
@@ -482,9 +487,7 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
                     button.setIcon(activeCondition.apply(item) ? activeIconFactory.create() : restIconFactory.create());
                     button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
                     button.addThemeName("width-full body-text-label");
-                    button.addClickListener(_ -> {
-                        clickListener.apply(item).run();
-                    });
+                    button.addClickListener(_ -> clickListener.apply(item).run());
 
                     return button;
                 }));

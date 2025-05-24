@@ -66,6 +66,10 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql:1.21.0'
     testImplementation 'org.testcontainers:junit-jupiter:1.21.0'
 
+    testCompileOnly 'org.projectlombok:lombok:1.18.38'
+
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+
     jooqCodegen 'org.postgresql:postgresql:42.7.5'
 }
 
