@@ -53,7 +53,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.38'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools:3.4.5'
-    developmentOnly 'org.springframework.boot:spring-boot-docker-compose:3.4.5'
 
     runtimeOnly 'org.postgresql:postgresql:42.7.5'
     runtimeOnly('org.flywaydb:flyway-database-postgresql:11.8.0')
@@ -80,7 +79,7 @@ jooq {
     configuration {
         jdbc {
             driver = 'org.postgresql.Driver'
-            url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://127.0.0.1:4321/bookkeeper_gen'
+            url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://127.0.0.1:5432/vallterra_gen'
             user = 'bookkeeper'
             password = 'admin'
         }
@@ -107,7 +106,7 @@ jooq {
 }
 
 flyway {
-    url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://127.0.0.1:4321/bookkeeper_gen'
+    url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://127.0.0.1:5432/vallterra_gen'
     user = 'bookkeeper'
     password = 'admin'
     driver = 'org.postgresql.Driver'

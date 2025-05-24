@@ -37,24 +37,4 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return record.into(Character.class);
     }
 
-    @Override
-    public void deleteById(Integer id) {
-        db.deleteFrom(CHARACTER)
-                .where(CHARACTER.ID.eq(id))
-                .execute();
-    }
-
-    @Override
-    public List<Character> findByNameContaining(String name) {
-        return db.selectFrom(CHARACTER)
-                .where(CHARACTER.NAME.containsIgnoreCase(name))
-                .fetchInto(Character.class);
-    }
-
-    @Override
-    public List<Character> findByVallterraUserId(Long vallterraUserId) {
-        return db.selectFrom(CHARACTER)
-                .where(CHARACTER.VALLTERRA_USER_ID.eq(vallterraUserId))
-                .fetchInto(Character.class);
-    }
 }

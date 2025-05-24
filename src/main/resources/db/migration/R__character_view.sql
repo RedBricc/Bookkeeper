@@ -21,12 +21,14 @@ select
     c.image,
     c.xp,
     c.notes,
-    c.vallterra_user_id,
-    vu.username,
+    c.wiki_user_id,
+    wu.vallterra_user_id,
+    wu.username,
     vu.player_name,
     ca.adventure_count
 from character c
-left join public.vallterra_user vu on c.vallterra_user_id = vu.id
+left join public.wiki_user wu on c.wiki_user_id = wu.id
+left join public.vallterra_user vu on wu.vallterra_user_id = vu.id
 left join (
     select ca.character_id, count(ca.id) as adventure_count
     from character_adventure ca

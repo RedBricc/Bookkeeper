@@ -77,7 +77,7 @@ public class CharacterDetailView extends VerticalLayout implements HasUrlParamet
 
         // Configure form fields
         userComboBox.setWidthFull();
-        userComboBox.setItemLabelGenerator(user -> user.getUsername() != null ? user.getUsername() : "Unknown");
+        userComboBox.setItemLabelGenerator(user -> user.getPlayerName() != null ? user.getPlayerName() : "Unknown");
         userComboBox.setItems(vallterraUserRepository.findAll());
 
         nameField.setWidthFull();
@@ -147,8 +147,8 @@ public class CharacterDetailView extends VerticalLayout implements HasUrlParamet
         var formLayout = new HorizontalLayout(column1, column2);
         formLayout.setWidthFull();
 
-        var saveButton = new Button("Save", e -> saveCharacter());
-        var cancelButton = new Button("Cancel", e -> getUI().ifPresent(ui -> ui.navigate(CharactersView.class)));
+        var saveButton = new Button("Save", _ -> saveCharacter());
+        var cancelButton = new Button("Cancel", _ -> getUI().ifPresent(ui -> ui.navigate(CharactersView.class)));
         var buttonLayout = new HorizontalLayout(saveButton, cancelButton);
 
         var characterLayout = new VerticalLayout(title, formLayout, buttonLayout);
@@ -170,8 +170,8 @@ public class CharacterDetailView extends VerticalLayout implements HasUrlParamet
     }
 
     private void fillCharacterForm(Character character) {
-        if (character.getVallterraUserId() != null) {
-            vallterraUserRepository.findById(character.getVallterraUserId().intValue()).ifPresent(userComboBox::setValue);
+        if (character.getWikiUserId() != null) {
+            vallterraUserRepository.findById(character.getWikiUserId().intValue()).ifPresent(userComboBox::setValue);
         }
         nameField.setValue(character.getName() != null ? character.getName() : "");
         raceField.setValue(character.getRace() != null ? character.getRace() : "");
@@ -197,7 +197,7 @@ public class CharacterDetailView extends VerticalLayout implements HasUrlParamet
     private void saveCharacter() {
         VallterraUser selectedUser = userComboBox.getValue();
         if (selectedUser != null) {
-            character.setVallterraUserId(selectedUser.getId().longValue());
+            character.setWikiUserId(selectedUser.getId().longValue());
         }
 
         character.setName(nameField.getValue());

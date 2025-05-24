@@ -40,26 +40,4 @@ public interface CharacterRepository {
      */
     Character save(@NotNull Character character);
 
-    /**
-     * Delete a character by its ID.
-     *
-     * @param id the character ID
-     */
-    void deleteById(@NotNull Integer id);
-
-    /**
-     * Find characters by name (partial match).
-     *
-     * @param name the name to search for
-     * @return a list of characters with matching names
-     */
-    List<Character> findByNameContaining(String name);
-
-    /**
-     * Find characters by Vallterra user ID.
-     *
-     * @param vallterraUserId the Vallterra user ID
-     * @return a list of characters for the given user
-     */
-    List<Character> findByVallterraUserId(@NotNull Long vallterraUserId);
 }

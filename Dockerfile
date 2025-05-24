@@ -6,7 +6,7 @@ FROM postgres:17 AS build
 
 ARG JAVA_VERSION
 
-ENV DB_NAME=bookkeeper_gen \
+ENV DB_NAME=vallterra_gen \
     DB_USER=bookkeeper \
     DB_PASSWORD=admin \
     JAVA_VERSION=$JAVA_VERSION \
@@ -34,18 +34,17 @@ RUN set -eux; \
     chown -R postgres:postgres /workspace /var/lib/postgresql; \
     su postgres -c "initdb"; \
     su postgres -c "pg_ctl -o \"-c listen_addresses='localhost'\" -w start"; \
-    su postgres -c "psql -f /workspace/db-init/init_bookkeeper_gen.sql"; \
+    su postgres -c "psql -f /workspace/db-init/init_vallterra_gen.sql"; \
     # Build the application
-    ./gradlew clean jooqCodegen bootJar -x test --no-daemon \
-    -Dgen.db.url=jdbc:postgresql://localhost:5432/${DB_NAME}; \
+    ./gradlew clean jooqCodegen bootJar -x test --no-daemon; \
     su postgres -c "pg_ctl -m fast stop"; \
-    rm -f /workspace/db-init/init_bookkeeper_gen.sql
+    rm -f /workspace/db-init/init_vallterra_gen.sql
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre AS runtime
 
 COPY --from=build /workspace/build/libs/*-SNAPSHOT.jar /app/app.jar
-COPY /certs/bookkeeper /app/certs/bookkeeper
-COPY /certs/bookkeeper/cert.crt /usr/local/share/ca-certificates/bookkeeper.crt
+COPY /devops/certs/bookkeeper /app/devops/certs/bookkeeper
+COPY /devops/certs/bookkeeper/cert.crt /usr/local/share/ca-certificates/bookkeeper.crt
 RUN update-ca-certificates
 
 WORKDIR /app
