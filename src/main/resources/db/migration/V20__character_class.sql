@@ -1,0 +1,1 @@
+alter table character rename column class to main_class;

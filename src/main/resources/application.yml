@@ -8,7 +8,7 @@ spring:
       poll-interval: 2s
       quiet-period: 1s
   datasource:
-    url: jdbc:postgresql://host.docker.internal:4321/bookkeeper
+    url: jdbc:postgresql://127.0.0.1:5432/vallterra
     username: bookkeeper
     password: admin
   threads:
@@ -22,6 +22,11 @@ spring:
     baseline-on-migrate: true
 server:
   port: 9696
+  ssl:
+    enabled: true
+    key-alias: bookkeeper
+    certificate: devops/certs/bookkeeper/cert.crt
+    certificate-private-key: devops/certs/bookkeeper/cert.key
 logging:
   level:
     web: info

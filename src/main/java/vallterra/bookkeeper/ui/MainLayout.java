@@ -3,74 +3,161 @@ package vallterra.bookkeeper.ui;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.details.DetailsVariant;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.spring.security.AuthenticationContext;
+import jakarta.annotation.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
-import vallterra.bookkeeper.ui.view.*;
+import vallterra.bookkeeper.ui.view.CharactersView;
+import vallterra.bookkeeper.ui.view.HomeView;
+import vallterra.bookkeeper.ui.view.PointRewardsView;
+import vallterra.bookkeeper.ui.view.QuestsView;
 
 public class MainLayout extends AppLayout {
 
     private final transient AuthenticationContext authContext;
+    private final SplitLayout contentLayout;
+    private Component content;
 
     public MainLayout(AuthenticationContext authContext) {
         this.authContext = authContext;
 
         buildNavbar();
-        buildDrawer();
+
+        contentLayout = new SplitLayout();
+        contentLayout.setSizeFull();
+        contentLayout.setSplitterPosition(20);
+        contentLayout.addToPrimary(buildSidebar());
+
+        super.setContent(contentLayout);
+    }
+
+    @Override
+    public void setContent(Component content) {
+        var splitterPosition = contentLayout.getSplitterPosition();
+
+        removeContent();
+        if (content != null) {
+            this.content = content;
+            content.getElement().removeAttribute("slot");
+
+            contentLayout.addToSecondary(content);
+        }
+
+        contentLayout.setSplitterPosition(splitterPosition);
+    }
+
+    private void removeContent() {
+        if (this.content != null) {
+            this.content.getElement().removeFromParent();
+            this.content = null;
+        }
     }
 
     private void buildNavbar() {
-        var bookIcon = VaadinIcon.BOOK.create();
-        bookIcon.getStyle().setFontSize("1.5rem");
-
-        var titleContainer = new HorizontalLayout(bookIcon, new H1("Bookkeeper"));
-        titleContainer.setPadding(true);
-        titleContainer.setAlignItems(FlexComponent.Alignment.CENTER);
-
-        addToNavbar(titleContainer);
-    }
-
-    private void buildDrawer() {
         var user = authContext.getAuthenticatedUser(UserDetails.class);
 
-        var drawerContainer = new VerticalLayout();
-        drawerContainer.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        drawerContainer.setSizeFull();
+        var headerContainer = new HorizontalLayout();
+        headerContainer.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        headerContainer.setAlignItems(FlexComponent.Alignment.END);
+        headerContainer.setPadding(true);
+        headerContainer.setWidthFull();
 
-        var pages = new VerticalLayout();
-        pages.addClassName("container-large");
+        headerContainer.add(getTitleContainer(), getPages(), getUserContainer(user.orElse(null)));
 
-        pages.add(createMenuLink(HomeView.class, "Home", VaadinIcon.HOME));
-        pages.add(createMenuLink(QuestsView.class, "Quests", VaadinIcon.ABACUS));
-        pages.add(createMenuLink(CharactersView.class, "Characters", VaadinIcon.USERS));
-        pages.add(createMenuLink(DmToolsView.class, "DM Tools", VaadinIcon.TOOLS));
-        pages.add(createMenuLink(NotesView.class, "Notes", VaadinIcon.PENCIL));
+        addToNavbar(headerContainer);
+    }
 
-        drawerContainer.add(pages);
+    private static HorizontalLayout getTitleContainer() {
+        var bookIcon = VaadinIcon.BOOK.create();
+        bookIcon.getStyle().setFontSize("1.25rem");
 
-        if (user.isPresent()) {
-            var loggedUser = new Span("Welcome %s!".formatted(user.get().getUsername()));
-            var logout = new Button("Logout", click -> this.authContext.logout());
+        var titleContainer = new HorizontalLayout(bookIcon, new H2("Bookkeeper"));
+        titleContainer.setPadding(false);
+        titleContainer.setAlignItems(FlexComponent.Alignment.CENTER);
+        titleContainer.getStyle().set("flex", "1");
 
-            drawerContainer.add(new VerticalLayout(loggedUser, logout));
+        return titleContainer;
+    }
+
+    private HorizontalLayout getPages() {
+        var pages = new HorizontalLayout();
+        pages.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        pages.getStyle().set("flex", "1");
+
+        pages.add(new SideNavItem("Home", HomeView.class, VaadinIcon.HOME.create()));
+        pages.add(new SideNavItem("Quests", QuestsView.class, VaadinIcon.ROAD.create()));
+        pages.add(new SideNavItem("Characters", CharactersView.class, VaadinIcon.USERS.create()));
+        pages.add(new SideNavItem("Rewards", PointRewardsView.class, VaadinIcon.TROPHY.create()));
+
+        return pages;
+    }
+
+    private HorizontalLayout getUserContainer(@Nullable UserDetails user) {
+        var userContainer = new HorizontalLayout();
+
+        if (user != null) {
+            var loggedUser = new Span(user.getUsername());
+            var logout = new Button("Logout", _ -> this.authContext.logout());
+            logout.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+
+            userContainer.add(loggedUser, logout);
         }
 
-        addToDrawer(drawerContainer);
+        userContainer.setAlignItems(FlexComponent.Alignment.CENTER);
+        userContainer.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        userContainer.getStyle().set("flex", "1");
+
+        return userContainer;
     }
 
-    private RouterLink createMenuLink(Class<? extends Component> viewClass, String caption, VaadinIcon icon) {
-        var routerLink = new RouterLink(viewClass);
+    private VerticalLayout buildSidebar() {
+        var sideBarLayout = new VerticalLayout();
+        sideBarLayout.setWidthFull();
 
-        routerLink.setClassName("menu-link");
-        routerLink.add(icon.create());
-        routerLink.add(new Span(caption));
+        sideBarLayout.add(buildOpenedTool("Quest Outline", "Create and manage quest outlines"));
+        sideBarLayout.add(buildDisabledTool("Combat Tracker", "Track combat encounters"));
+        sideBarLayout.add(buildTool("Location Tracker", "Track locations and maps"));
+        sideBarLayout.add(buildTool("NPC Tracker", "Track NPCs in the current location"));
+        sideBarLayout.add(buildDisabledTool("Quest Log", "Log for the current quest"));
+        sideBarLayout.add(buildTool("Story beats", "Track story beats and plot points"));
+        sideBarLayout.add(buildOpenedTool("Reminders", "Set reminders in a to-do list"));
 
-        return routerLink;
+        return sideBarLayout;
     }
+
+    private Details buildOpenedTool(String title, String description) {
+        var tool = buildTool(title, description);
+
+        tool.setOpened(true);
+
+        return tool;
+    }
+
+    private Details buildDisabledTool(String title, String description) {
+        var tool = buildTool(title, description);
+
+        tool.setEnabled(false);
+
+        return tool;
+    }
+
+    private Details buildTool(String title, String description) {
+        var tool = new Details(title, new Span(description));
+
+        tool.addThemeVariants(DetailsVariant.REVERSE);
+        tool.setWidthFull();
+
+        return tool;
+    }
+
 }

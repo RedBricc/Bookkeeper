@@ -13,8 +13,8 @@ It also provides tools for Dungeon Masters to manage their campaigns.
 ## Prerequisites
 The project was created in IntelliJ IDEA but can be imported into the IDE of your choice.
 To run the project you will need:
-- **Java 21:** Required to run the application
-- **Docker:** Needed to initialize the development database
+- **Java 24:** Required to run the application
+- **Docker:** For production builds
 
 ## Setup
 1. **Clone the repository:**
@@ -22,11 +22,15 @@ To run the project you will need:
     git clone https://github.com/yourusername/bookkeeper.git
     cd bookkeeper
     ```
-2. **Initialize the development database:**
+2. **Build the project:**
     ```bash
-    docker-compose up
+    ./gradlew build
     ```
 3. **Start the application:**
     ```bash
     ./gradlew bootRun
+    ```
+4. **Production build:**
+    ```bash
+    docker compose up
     ```

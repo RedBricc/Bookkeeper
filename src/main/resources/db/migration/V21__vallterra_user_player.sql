@@ -1,0 +1,1 @@
+alter table vallterra_user add column player_name text;

@@ -1,0 +1,1 @@
+create index character_main_class_index on character (main_class);

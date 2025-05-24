@@ -9,11 +9,11 @@ buildscript {
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.4'
+    id 'org.springframework.boot' version '3.4.5'
     id 'io.spring.dependency-management' version '1.1.7'
-    id 'com.vaadin' version '24.7.0'
-    id 'org.flywaydb.flyway' version '11.1.0'
-    id 'org.jooq.jooq-codegen-gradle' version '3.19.21'
+    id 'com.vaadin' version '24.7.3'
+    id 'org.flywaydb.flyway' version '11.8.0'
+    id 'org.jooq.jooq-codegen-gradle' version '3.20.3'
 }
 
 group = 'vallterra'
@@ -21,7 +21,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(24)
     }
 }
 
@@ -36,40 +36,46 @@ repositories {
 }
 
 ext {
-    set('vaadinVersion', "24.7.0")
+    set('vaadinVersion', '24.7.3')
 }
 
+layout.buildDirectory.set(layout.projectDirectory.dir((System.getenv('GRADLE_BUILD_DIR') ?: 'build')))
+
 dependencies {
-    implementation 'com.vaadin:vaadin-spring-boot-starter'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.flywaydb:flyway-core'
-    implementation("org.springframework.boot:spring-boot-starter-jooq:3.4.4")
-    implementation 'org.jooq.jooq-codegen-gradle:org.jooq.jooq-codegen-gradle.gradle.plugin:3.19.21'
+    implementation 'com.vaadin:vaadin-spring-boot-starter:24.7.3'
+    implementation 'org.springframework.boot:spring-boot-starter-security:3.4.5'
+    implementation 'org.flywaydb:flyway-core:11.8.0'
+    implementation 'org.springframework.boot:spring-boot-starter-jooq:3.4.5'
+    implementation 'org.jooq.jooq-codegen-gradle:org.jooq.jooq-codegen-gradle.gradle.plugin:3.20.3'
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    implementation 'org.jooq:jooq:3.20.3'
 
-    compileOnly 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok:1.18.38'
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools:3.4.5'
 
-    runtimeOnly 'org.postgresql:postgresql'
-    runtimeOnly("org.flywaydb:flyway-database-postgresql:11.1.0")
+    runtimeOnly 'org.postgresql:postgresql:42.7.5'
+    runtimeOnly('org.flywaydb:flyway-database-postgresql:11.8.0')
 
-    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.testcontainers:testcontainers'
-    testImplementation 'org.testcontainers:postgresql'
-    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.4.5'
+    testImplementation 'org.springframework.security:spring-security-test:6.4.5'
+    testImplementation 'org.testcontainers:testcontainers:1.21.0'
+    testImplementation 'org.testcontainers:postgresql:1.21.0'
+    testImplementation 'org.testcontainers:junit-jupiter:1.21.0'
 
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testCompileOnly 'org.projectlombok:lombok:1.18.38'
 
-    jooqCodegen 'org.postgresql:postgresql:42.7.4'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    jooqCodegen 'org.postgresql:postgresql:42.7.5'
 }
 
 dependencyManagement {
     imports {
-        mavenBom "com.vaadin:vaadin-bom:${vaadinVersion}"
+        mavenBom 'com.vaadin:vaadin-bom:${vaadinVersion}'
     }
 }
 
@@ -77,7 +83,7 @@ jooq {
     configuration {
         jdbc {
             driver = 'org.postgresql.Driver'
-            url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://host.docker.internal:4321/bookkeeper_gen'
+            url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://127.0.0.1:5432/vallterra_gen'
             user = 'bookkeeper'
             password = 'admin'
         }
@@ -97,13 +103,14 @@ jooq {
                 validationAnnotations = true
                 udts = true
                 embeddables = true
+                indexes = true
             }
         }
     }
 }
 
 flyway {
-    url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://host.docker.internal:4321/bookkeeper_gen'
+    url = System.getProperty('gen.db.url') ?: 'jdbc:postgresql://127.0.0.1:5432/vallterra_gen'
     user = 'bookkeeper'
     password = 'admin'
     driver = 'org.postgresql.Driver'

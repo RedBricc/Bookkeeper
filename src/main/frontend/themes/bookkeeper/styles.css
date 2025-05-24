@@ -1,0 +1,118 @@
+.toggleable-range-filter {
+    width: 100%;
+    max-width: 100%;
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+    flex-wrap: wrap-reverse;
+    gap: var(--lumo-space-xs);
+    align-items: center;
+
+    .toggleable-range-input {
+        flex: 1;
+        padding: 0;
+        width: 160px;
+
+        input {
+            mask-image: none !important;
+        }
+    }
+
+    vaadin-button {
+        min-width: 24px !important;
+        width: 24px;
+        margin: 0;
+    }
+}
+
+.toggleable-number-range-filter {
+    .toggleable-number-range-input {
+        min-width: 24px;
+    }
+}
+
+.toggleable-date-range-filter {
+    .toggleable-date-range-input {
+        min-width: 130px;
+    }
+}
+
+.toggleable-duration-range-filter {
+    .toggleable-duration-range-input {
+        max-width: fit-content;
+    }
+}
+
+.bookkeeper-grid {
+    vaadin-grid-cell-content {
+        vaadin-grid-sorter:has(.grid-header-filter) {
+            &::part(indicators) {
+                align-self: end;
+                margin-bottom: 14px;
+            }
+        }
+
+        ::part(input-field) {
+            box-sizing: border-box;
+            padding: 0 0 0 6px;
+            background: var(--vaadin-input-field-background, var(--lumo-contrast-5pct));
+        }
+
+        .grid-header-filter::part(label) {
+            padding-bottom: 0.5em;
+            padding-right: 0.25em;
+        }
+
+        .grid-header-filter {
+            margin: 8px 0 6px 0;
+            padding: 0;
+            max-width: 100%;
+            width: 200px;
+            align-items: end;
+
+            &.duration-field {
+                width: fit-content;
+            }
+
+            &:has(.toggleable-date-range-filter) {
+                width: 300px;
+            }
+
+            &:has(.toggleable-duration-range-filter) {
+                width: 340px;
+            }
+
+            label {
+                text-wrap: auto;
+                text-align: start;
+                display: block;
+                color: var(--lumo-body-text-color);
+            }
+
+            input {
+                color: var(--lumo-body-text-color);
+                padding: 0;
+                mask-image: linear-gradient(to left, transparent, #000 6px);
+
+                &::placeholder {
+                    color: var(--lumo-body-text-color);
+                    font-size: var(--lumo-font-size-s);
+                    text-overflow: ellipsis;
+                }
+            }
+
+            div[slot='helper'] {
+                color: var(--lumo-body-text-color);
+            }
+        }
+    }
+}
+
+.bookkeeper-text-area textarea {
+    padding: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-xs);
+    color: var(--lumo-body-text-color);
+    font-weight: normal;
+}
+
+html {
+    --vaadin-field-default-width: fit-content;
+}

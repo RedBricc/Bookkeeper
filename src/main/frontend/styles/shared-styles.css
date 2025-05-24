@@ -17,3 +17,53 @@
     line-height: 1.25rem;
     gap: 1.5rem;
 }
+
+.duration-field {
+    &[invalid] vaadin-horizontal-layout {
+        background: var(--lumo-error-color-10pct);
+    }
+
+    vaadin-horizontal-layout {
+        background: var(--lumo-contrast-5pct);
+        border-radius: var(--lumo-border-radius-m);
+        gap: 2px;
+        padding: 0 var(--lumo-space-s);
+
+        vaadin-number-field {
+            width: fit-content;
+            padding: 0;
+
+            .vaadin-field-container {
+                width: fit-content;
+            }
+
+            &::part(input-field) {
+                background: none;
+                gap: 2px;
+                padding: 0 5px 0 2px;
+                width: fit-content;
+            }
+
+            &[invalid]::part(input-field) {
+                background: var(--lumo-error-color-10pct);
+            }
+
+            input {
+                text-align: end;
+                max-width: 20px;
+                width: 20px;
+                mask-image: none !important;
+
+                &::placeholder {
+                    color: var(--lumo-tint-40pct) !important;
+                    letter-spacing: -0.75px;
+                    margin-right: 2px;
+                }
+            }
+
+            label {
+                margin-top: 2px;
+            }
+        }
+    }
+}
