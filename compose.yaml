@@ -32,6 +32,8 @@ services:
         condition: service_completed_successfully
     ports:
       - "9696:9696"
+    env_file:
+      - /etc/vallterra/vallterra.env
     environment:
       DB_URL: ${DB_URL}
       DB_USER: ${DB_USER}

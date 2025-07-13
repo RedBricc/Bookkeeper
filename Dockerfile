@@ -29,6 +29,8 @@ RUN apt update && \
 WORKDIR /workspace
 COPY . .
 
+RUN chmod +x /workspace/gradlew
+
 RUN set -eux; \
     # Set up gen database
     chown -R postgres:postgres /workspace /var/lib/postgresql; \
