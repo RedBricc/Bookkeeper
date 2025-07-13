@@ -34,10 +34,6 @@ services:
       - "9696:9696"
     env_file:
       - /etc/vallterra/vallterra.env
-    environment:
-      DB_URL: ${DB_URL}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
     networks: [ web ]
     restart: unless-stopped
     healthcheck:
