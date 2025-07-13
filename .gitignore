@@ -50,3 +50,4 @@ out/
 
 ### Secrets ###
 /devops/
+/etc/
