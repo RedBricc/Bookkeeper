@@ -38,9 +38,9 @@ public class BookkeeperUserRepositoryImpl implements BookkeeperUserRepository {
     }
 
     @Override
-    public Optional<BookkeeperUser> findByUsername(String username) {
+    public Optional<BookkeeperUser> findByUsernameIgnoreCase(String username) {
         return db.selectFrom(BOOKKEEPER_USER)
-                .where(BOOKKEEPER_USER.USERNAME.eq(username))
+                .where(BOOKKEEPER_USER.USERNAME.equalIgnoreCase(username))
                 .fetchOptionalInto(BookkeeperUser.class);
     }
 }

@@ -18,6 +18,6 @@ public interface BookkeeperUserRepository {
     BookkeeperUser getById(@NotNull Integer bookkeeperUserId);
     BookkeeperUser save(@NotNull BookkeeperUser user);
     Optional<BookkeeperUser> findById(@NotNull Integer bookkeeperUserId);
-    Optional<BookkeeperUser> findByUsername(@NotNull String username);
+    Optional<BookkeeperUser> findByUsernameIgnoreCase(@NotNull String username);
 
 }

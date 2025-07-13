@@ -20,7 +20,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = bookkeeperUserRepository.findByUsername(username)
+        var user = bookkeeperUserRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         var roles = bookkeeperUserRoleRepository.getRoles(user.getId());
 
