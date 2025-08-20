@@ -43,6 +43,7 @@ public class TestCharacter extends JooqTestRecord<CharacterRecord, Character, In
     protected CharacterRecord setMinimal(CharacterRecord record) {
         return record
                 .setName("Test character")
+                .setShortName("Test")
                 .setRace("Human")
                 .setMainClass("Fighter")
                 .setLevel(1)
