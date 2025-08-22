@@ -8,11 +8,12 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import org.jooq.generated.tables.pojos.Character;
 import org.jooq.generated.tables.records.VCharacterAdventureRecord;
-import org.springframework.stereotype.Component;
 import vallterra.bookkeeper.backend.adventure.CharacterAdventureRepository;
 import vallterra.bookkeeper.backend.user.CharacterRepository;
 import vallterra.bookkeeper.backend.user.VallterraUserRepository;
@@ -28,7 +29,8 @@ import vallterra.bookkeeper.ui.view.adventure.AdventureDetailView;
 import static org.jooq.generated.tables.VCharacterAdventure.V_CHARACTER_ADVENTURE;
 
 @PermitAll
-@Component
+@UIScope
+@SpringComponent
 @RequiredArgsConstructor
 @Route(value = "character", layout = MainLayout.class)
 public class CharacterDetailView extends VerticalLayout implements HasUrlParameter<Integer> {
