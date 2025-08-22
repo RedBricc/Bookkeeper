@@ -16,7 +16,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.renderer.*;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
@@ -33,6 +32,7 @@ import org.jooq.types.YearToSecond;
 import vallterra.bookkeeper.backend.provider.JooqDataProvider;
 import vallterra.bookkeeper.backend.util.BookkeeperCaseUtils;
 import vallterra.bookkeeper.backend.util.BookkeeperDateTimeUtils;
+import vallterra.bookkeeper.ui.component.ReadOnlyTextarea;
 import vallterra.bookkeeper.ui.component.filter.FilterComponent;
 import vallterra.bookkeeper.ui.component.filter.component.*;
 import vallterra.bookkeeper.ui.component.filter.event.FilterEvent;
@@ -297,16 +297,7 @@ public class BookkeeperGrid<R extends Record> extends Grid<R> {
 
     public <V> Column<R> addTextAreaColumn(TableField<R, V> tableField) {
         return addColumn(tableField, false)
-                .setRenderer(new ComponentRenderer<>(item -> {
-                    var textArea = new TextArea();
-
-                    textArea.setValue(Objects.toString(tableField.getValue(item), ""));
-                    textArea.setReadOnly(true);
-                    textArea.setWidthFull();
-                    textArea.addClassName("bookkeeper-text-area");
-
-                    return textArea;
-                }))
+                .setRenderer(new ComponentRenderer<>(item -> new ReadOnlyTextarea(tableField.getValue(item))))
                 .setSortable(false);
     }
 

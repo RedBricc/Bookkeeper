@@ -1,4 +1,4 @@
-package vallterra.bookkeeper.ui.view;
+package vallterra.bookkeeper.ui.view.character;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;

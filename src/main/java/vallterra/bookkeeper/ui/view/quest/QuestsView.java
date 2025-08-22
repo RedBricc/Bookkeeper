@@ -1,4 +1,4 @@
-package vallterra.bookkeeper.ui.view;
+package vallterra.bookkeeper.ui.view.quest;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -13,6 +13,8 @@ import org.jooq.generated.tables.records.VQuestRecord;
 import vallterra.bookkeeper.ui.MainLayout;
 import vallterra.bookkeeper.ui.component.grid.BookkeeperGridLayout;
 import vallterra.bookkeeper.ui.data.ContextAccess;
+import vallterra.bookkeeper.ui.view.adventure.AdventureDetailView;
+import vallterra.bookkeeper.ui.view.points.PointRewardsView;
 
 import java.util.List;
 

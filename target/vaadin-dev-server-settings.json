@@ -1,0 +1,18 @@
+{
+  "frontendFolder": "C:/Users/juris/IdeaProjects/bookkeeper/./src/main/frontend",
+  "themeFolder": "themes",
+  "themeResourceFolder": "C:/Users/juris/IdeaProjects/bookkeeper/./src/main/frontend/generated/jar-resources",
+  "staticOutput": "C:/Users/juris/IdeaProjects/bookkeeper/target/classes/META-INF/VAADIN/webapp/VAADIN/static",
+  "generatedFolder": "generated",
+  "statsOutput": "C:\\Users\\juris\\IdeaProjects\\bookkeeper\\target\\classes\\META-INF\\VAADIN\\config",
+  "frontendBundleOutput": "C:\\Users\\juris\\IdeaProjects\\bookkeeper\\target\\classes\\META-INF\\VAADIN\\webapp",
+  "devBundleOutput": "C:/Users/juris/IdeaProjects/bookkeeper/target/dev-bundle/webapp",
+  "devBundleStatsOutput": "C:/Users/juris/IdeaProjects/bookkeeper/target/dev-bundle/config",
+  "i18nOutput": "target/classes/vaadin-i18n",
+  "jarResourcesFolder": "C:/Users/juris/IdeaProjects/bookkeeper/./src/main/frontend/generated/jar-resources",
+  "themeName": "",
+  "clientServiceWorkerSource": "C:\\Users\\juris\\IdeaProjects\\bookkeeper\\target\\sw.ts",
+  "pwaEnabled": false,
+  "offlineEnabled": false,
+  "offlinePath": "'offline.html'"
+}

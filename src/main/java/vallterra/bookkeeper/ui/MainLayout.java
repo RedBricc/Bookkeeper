@@ -17,10 +17,10 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
-import vallterra.bookkeeper.ui.view.CharactersView;
 import vallterra.bookkeeper.ui.view.HomeView;
-import vallterra.bookkeeper.ui.view.PointRewardsView;
-import vallterra.bookkeeper.ui.view.QuestsView;
+import vallterra.bookkeeper.ui.view.character.CharactersView;
+import vallterra.bookkeeper.ui.view.points.PointRewardsView;
+import vallterra.bookkeeper.ui.view.quest.QuestsView;
 
 public class MainLayout extends AppLayout {
 

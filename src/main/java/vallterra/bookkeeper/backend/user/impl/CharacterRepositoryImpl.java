@@ -31,6 +31,13 @@ public class CharacterRepositoryImpl implements CharacterRepository {
     }
 
     @Override
+    public Character getById(Integer id) {
+        return db.selectFrom(CHARACTER)
+                .where(CHARACTER.ID.eq(id))
+                .fetchSingleInto(Character.class);
+    }
+
+    @Override
     public Character save(Character character) {
         var record = db.newRecord(CHARACTER, character);
         record.store();

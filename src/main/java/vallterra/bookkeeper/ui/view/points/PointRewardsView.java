@@ -1,4 +1,4 @@
-package vallterra.bookkeeper.ui.view;
+package vallterra.bookkeeper.ui.view.points;
 
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
