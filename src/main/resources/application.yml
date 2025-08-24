@@ -22,11 +22,6 @@ spring:
     baseline-on-migrate: true
 server:
   port: 9696
-  ssl:
-    enabled: true
-    key-alias: bookkeeper
-    certificate: devops/certs/bookkeeper/cert.crt
-    certificate-private-key: devops/certs/bookkeeper/cert.key
 logging:
   level:
     web: info
