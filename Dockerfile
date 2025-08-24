@@ -46,7 +46,7 @@ FROM eclipse-temurin:${JAVA_VERSION}-jre AS runtime
 
 COPY --from=build /workspace/build/libs/*-SNAPSHOT.jar /app/app.jar
 COPY /devops/certs/bookkeeper /app/devops/certs/bookkeeper
-COPY /devops/certs/bookkeeper/cert.crt /usr/local/share/ca-certificates/bookkeeper.pem
+COPY /devops/certs/bookkeeper/cert.pem /usr/local/share/ca-certificates/bookkeeper.pem
 RUN update-ca-certificates
 
 WORKDIR /app
