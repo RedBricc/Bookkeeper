@@ -58,5 +58,7 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./devops/certs/bookkeeper:/etc/nginx/certs/bookkeeper:ro
       - ./devops/certs/wiki:/etc/nginx/certs/wiki:ro
+      - ./devops/certs/adapticrawl:/etc/nginx/certs/adapticrawl:ro
+      - ./devops/certs/adapticrawl-api:/etc/nginx/certs/adapticrawl-api:ro
     networks: [ web ]
     restart: unless-stopped
