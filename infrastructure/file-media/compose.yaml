@@ -1,0 +1,71 @@
+name: file-media
+
+services:
+  filestash:
+    image: machines/filestash@sha256:2f69ce7814006512b6bbcd8aef4767c5424d270ce0b12819874e7dbd4e3de2b9
+    restart: unless-stopped
+    environment:
+      APPLICATION_URL: https://files.vallterra.wiki
+    ports:
+      - "127.0.0.1:18334:8334"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /home/deploy/file-media/filestash/state:/app/data/state
+    networks:
+      proxy:
+        aliases: [file-media-filestash]
+    cpus: 0.75
+    mem_limit: 768m
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  jellyfin:
+    image: jellyfin/jellyfin@sha256:78d3ea1207d1322471fcac39a614f004f2ccf7e878f95ab2977d752f07e4dd7e
+    user: "1000:1000"
+    group_add: ["993"]
+    restart: unless-stopped
+    environment:
+      JELLYFIN_PublishedServerUrl: https://media.vallterra.wiki
+    ports:
+      - "127.0.0.1:18096:8096"
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    volumes:
+      - /home/deploy/file-media/jellyfin/config:/config
+      - /home/deploy/file-media/jellyfin/cache:/cache
+      - type: bind
+        source: /mnt/data/Shared/Brick/Faili/Movies
+        target: /media/Brick/Faili/Movies
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /mnt/data/Shared/Vera/Movies
+        target: /media/Vera/Movies
+        read_only: true
+        bind:
+          create_host_path: false
+    networks:
+      proxy:
+        aliases: [file-media-jellyfin]
+    cpus: 2.0
+    mem_limit: 3g
+    pids_limit: 512
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  proxy:
+    external: true
+    name: bookkeeper_web

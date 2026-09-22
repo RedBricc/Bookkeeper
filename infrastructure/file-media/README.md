@@ -1,0 +1,116 @@
+# File and media services on the mini PC
+
+This Compose project adds Filestash and Jellyfin over the existing share without
+moving its contents or changing Samba. Runtime data lives in
+`/home/deploy/file-media`, outside this repository. Its `compose.yaml` and
+`scripts/certificates.sh` are symlinks to the tracked files in this directory.
+
+## Access
+
+- `https://files.vallterra.wiki`: Filestash. Select **Home share** and sign in with
+  an existing Samba username/password. The configured backend is the existing
+  `home-share` at `/mnt/data/Shared`. Samba continues to enforce access rights.
+- `https://files.vallterra.wiki/admin`: Filestash administration.
+- `https://media.vallterra.wiki`: Jellyfin. Initial administrator: **Brick**.
+- Generated initial passwords are in `/home/deploy/file-media/credentials.json`
+  (mode 0600). Never commit that file, runtime configuration, or certificate keys.
+
+Jellyfin indexes `/mnt/data/Shared/Brick/Faili/Movies` and
+`/mnt/data/Shared/Vera/Movies`. Vera's directory was created empty. Personal
+photos/videos elsewhere are not mounted into Jellyfin. Both media mounts are
+read-only, and metadata/cache are stored outside the share.
+
+Brick's directory mixes films and TV releases, so it is initially a mixed library.
+Its videos are playable, but Jellyfin may classify TV episodes as movies with the
+current on-disk layout. Properly separating Movies and Shows later will improve
+series metadata. Files have not been renamed or reorganized.
+
+## Isolation and resource limits
+
+- Separate Compose project `file-media`; no existing application is recreated.
+- The existing `bookkeeper_web` network provides access from `nginx-proxy`.
+- Host bindings are loopback-only: Filestash 18334 and Jellyfin 18096.
+- Nginx routes only the two new hostnames in `nginx/conf.d/file-media.conf`.
+  It resolves backends dynamically so an unavailable media service cannot prevent
+  the shared proxy from starting.
+- Jellyfin: 2 CPUs, 3 GiB RAM, 512 processes, UID/GID 1000, no capabilities.
+- Filestash: 0.75 CPU, 768 MiB RAM, 256 processes.
+- Container logs rotate at 10 MiB, three files each.
+- Jellyfin throttles ahead-of-playback transcoding and deletes old segments.
+  Expensive chapter/trickplay generation and real-time filesystem monitoring are
+  disabled. Use Jellyfin's scheduled/manual library scan after adding files.
+- Images are pinned by digest; upgrades are deliberate.
+
+## Intel acceleration
+
+Host: Ubuntu 24.04, Intel i5-6500 / HD Graphics 530. The host's existing `i915`
+driver exposes `/dev/dri/renderD128`; no driver installation or reboot was needed.
+Jellyfin's official image supplies Intel userspace drivers. The container receives
+only the render device and supplementary render group 993.
+
+Configured: Intel Quick Sync, device `/dev/dri/renderD128`, hardware encoding,
+and hardware decoding for H.264, HEVC 8-bit, MPEG-2, VC-1, and VP8. HEVC 10-bit,
+VP9 10-bit, AV1, HDR tone mapping, and Intel low-power encoders are disabled.
+Unsupported sources can still direct-play on a compatible client; transcoding
+them may require software decoding and be limited by the CPU budget.
+
+Validated using `vainfo` and a synthetic 720p H.264 clip: QSV decode, GPU resize
+to 360p, and QSV encode completed successfully. This verifies the hardware path;
+it does not guarantee real-time playback for every codec, subtitle, or resolution.
+
+Reference: https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/intel/
+
+## DNS and HTTPS
+
+Both names point to the public origin IPv4. Prefer DNS-only for `media`:
+Cloudflare's standard proxy has restrictions on self-hosted video and large-file
+delivery. Filestash large transfers are also subject to proxy upload/time limits
+when `files` is proxied.
+
+Public TCP 443 must forward to `192.168.0.134:443`. ACME HTTP validation and renewal
+also require public TCP 80 to reach `192.168.0.134:80`, including through any
+Cloudflare rules when the record is proxied. Only the ACME path is served over
+HTTP; all other requests redirect to HTTPS.
+
+Certificate state: `/home/deploy/file-media/letsencrypt`. Certificates are copied
+into the existing proxy certificate mount at
+`/home/deploy/Bookkeeper/devops/certs/wiki/file-media`, which is ignored by Git.
+
+Initial issuance:
+
+```sh
+/home/deploy/file-media/scripts/certificates.sh issue
+```
+
+Renewal:
+
+```sh
+/home/deploy/file-media/scripts/certificates.sh renew
+```
+
+Renewal installs the updated certificate and gracefully reloads Nginx after a
+successful configuration test. It does not restart any application container.
+The certificate command uses a lock to prevent overlapping runs. Renewal logs
+live outside this repository.
+
+## Operation and rollback
+
+```sh
+cd /home/deploy/file-media
+docker compose config --quiet
+docker compose ps
+docker compose logs --tail 100
+docker compose up -d
+```
+
+Before changing proxy configuration, run `docker exec nginx-proxy nginx -t`.
+Apply valid changes with `docker exec nginx-proxy nginx -s reload`.
+
+To stop only these services: `docker compose stop` in the runtime directory.
+To remove their containers: `docker compose down`. The external proxy network,
+existing apps, Samba share, and persistent configuration remain intact. Disable
+the two virtual hosts separately if removing the services permanently, then test
+and reload Nginx. Remove the dedicated certificate cron entry if retiring them.
+
+Back up the runtime configuration and certificate directory separately from Git;
+they contain sensitive data. The shared media still needs its own normal backup.
