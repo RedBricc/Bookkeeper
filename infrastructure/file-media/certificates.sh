@@ -18,7 +18,7 @@ run_certbot() {
 case "${1:-renew}" in
     issue)
         run_certbot certonly --webroot -w /webroot --cert-name file-media \
-            -d files.vallterra.wiki -d media.vallterra.wiki \
+            -d media.vallterra.wiki \
             --non-interactive --agree-tos --register-unsafely-without-email \
             --keep-until-expiring
         ;;

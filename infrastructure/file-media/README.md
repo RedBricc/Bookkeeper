@@ -62,16 +62,21 @@ Reference: https://jellyfin.org/docs/general/post-install/transcoding/hardware-a
 
 ## DNS and HTTPS
 
-Both names point to the public origin IPv4. Prefer DNS-only for `media`:
+Both names point to the public origin IPv4. `media` uses DNS-only; `files` remains
+Cloudflare-proxied with the existing wildcard Cloudflare Origin certificate.
+Browsers see Cloudflare's publicly trusted edge certificate for `files`.
+Do not switch `files` to DNS-only without provisioning its own public certificate.
+DNS-only is preferred for `media`:
 Cloudflare's standard proxy has restrictions on self-hosted video and large-file
 delivery. Filestash large transfers are also subject to proxy upload/time limits
 when `files` is proxied.
 
 Public TCP 443 must forward to `192.168.0.134:443`. ACME HTTP validation and renewal
-also require public TCP 80 to reach `192.168.0.134:80`, including through any
-Cloudflare rules when the record is proxied. Only the ACME path is served over
+for `media` also require public TCP 80 to reach `192.168.0.134:80`. Only the ACME path is served over
 HTTP; all other requests redirect to HTTPS.
 
+The Let's Encrypt certificate covers `media.vallterra.wiki` only. Cloudflare rejected
+HTTP validation for `files`, so media renewal deliberately does not depend on it.
 Certificate state: `/home/deploy/file-media/letsencrypt`. Certificates are copied
 into the existing proxy certificate mount at
 `/home/deploy/Bookkeeper/devops/certs/wiki/file-media`, which is ignored by Git.
@@ -88,6 +93,7 @@ Renewal:
 /home/deploy/file-media/scripts/certificates.sh renew
 ```
 
+The deploy user's crontab runs renewal daily at 03:17 and 15:17 UTC.
 Renewal installs the updated certificate and gracefully reloads Nginx after a
 successful configuration test. It does not restart any application container.
 The certificate command uses a lock to prevent overlapping runs. Renewal logs
