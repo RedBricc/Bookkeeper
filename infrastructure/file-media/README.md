@@ -41,6 +41,11 @@ series metadata. Files have not been renamed or reorganized.
   disabled. Use Jellyfin's scheduled/manual library scan after adding files.
 - Images are pinned by digest; upgrades are deliberate.
 
+Filestash requires `APPLICATION_URL=files.vallterra.wiki` without a URL scheme.
+Its persisted `general.force_ssl` setting must be `true`, yielding frontend
+`origin=https://files.vallterra.wiki`. Verify `/api/config` after changing these
+settings; a successful HTML response alone does not validate browser redirects.
+
 ## Intel acceleration
 
 Host: Ubuntu 24.04, Intel i5-6500 / HD Graphics 530. The host's existing `i915`

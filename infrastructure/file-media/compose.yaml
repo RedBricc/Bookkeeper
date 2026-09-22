@@ -5,7 +5,8 @@ services:
     image: machines/filestash@sha256:2f69ce7814006512b6bbcd8aef4767c5424d270ce0b12819874e7dbd4e3de2b9
     restart: unless-stopped
     environment:
-      APPLICATION_URL: https://files.vallterra.wiki
+      # Filestash expects a hostname here; general.force_ssl selects HTTPS.
+      APPLICATION_URL: files.vallterra.wiki
     ports:
       - "127.0.0.1:18334:8334"
     extra_hosts:
