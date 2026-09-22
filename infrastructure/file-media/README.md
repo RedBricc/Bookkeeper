@@ -10,6 +10,9 @@ moving its contents or changing Samba. Runtime data lives in
 - `https://files.vallterra.wiki`: Filestash. Select **Home share** and sign in with
   an existing Samba username/password. The configured backend is the existing
   `home-share` at `/mnt/data/Shared`. Samba continues to enforce access rights.
+  The passthrough login asks only for username/password; server, share, port,
+  and root path are supplied automatically by an authentication mapping.
+  Connection metadata alone does not prefill the standard backend form.
 - `https://files.vallterra.wiki/admin`: Filestash administration.
 - `https://media.vallterra.wiki`: Jellyfin. Initial administrator: **Brick**.
 - Generated initial passwords are in `/home/deploy/file-media/credentials.json`
@@ -45,6 +48,11 @@ Filestash requires `APPLICATION_URL=files.vallterra.wiki` without a URL scheme.
 Its persisted `general.force_ssl` setting must be `true`, yielding frontend
 `origin=https://files.vallterra.wiki`. Verify `/api/config` after changing these
 settings; a successful HTML response alone does not validate browser redirects.
+
+To reapply the fixed-share login and HTTPS settings, run
+`python3 /home/deploy/Bookkeeper/infrastructure/file-media/configure-filestash.py`.
+The script uses the private admin credentials file and does not store users'
+Samba passwords. Update that private file if the admin password changes.
 
 ## Intel acceleration
 
