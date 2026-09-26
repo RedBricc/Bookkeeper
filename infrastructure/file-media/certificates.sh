@@ -18,9 +18,9 @@ run_certbot() {
 case "${1:-renew}" in
     issue)
         run_certbot certonly --webroot -w /webroot --cert-name file-media \
-            -d media.vallterra.wiki \
+            -d media.vallterra.wiki -d movies.vallterra.wiki \
             --non-interactive --agree-tos --register-unsafely-without-email \
-            --keep-until-expiring
+            --keep-until-expiring --expand
         ;;
     renew)
         test -f "$ROOT/letsencrypt/renewal/file-media.conf" || exit 0

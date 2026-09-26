@@ -14,7 +14,7 @@ moving its contents or changing Samba. Runtime data lives in
   and root path are supplied automatically by an authentication mapping.
   Connection metadata alone does not prefill the standard backend form.
 - `https://files.vallterra.wiki/admin`: Filestash administration.
-- `https://media.vallterra.wiki`: Jellyfin. Initial administrator: **Brick**.
+- `https://media.vallterra.wiki` (alias `https://movies.vallterra.wiki`): Jellyfin. Initial administrator: **Brick**.
 - Generated initial passwords are in `/home/deploy/file-media/credentials.json`
   (mode 0600). Never commit that file, runtime configuration, or certificate keys.
 
@@ -88,7 +88,7 @@ Public TCP 443 must forward to `192.168.0.134:443`. ACME HTTP validation and ren
 for `media` also require public TCP 80 to reach `192.168.0.134:80`. Only the ACME path is served over
 HTTP; all other requests redirect to HTTPS.
 
-The Let's Encrypt certificate covers `media.vallterra.wiki` only. Cloudflare rejected
+The Let's Encrypt certificate covers `media.vallterra.wiki` and `movies.vallterra.wiki`. Cloudflare rejected
 HTTP validation for `files`, so media renewal deliberately does not depend on it.
 Certificate state: `/home/deploy/file-media/letsencrypt`. Certificates are copied
 into the existing proxy certificate mount at
