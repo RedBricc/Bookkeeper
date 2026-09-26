@@ -2,7 +2,13 @@ name: file-media
 
 services:
   filestash:
-    image: machines/filestash@sha256:2f69ce7814006512b6bbcd8aef4767c5424d270ce0b12819874e7dbd4e3de2b9
+    image: file-media/filestash-intel:20260926
+    build:
+      context: /home/deploy/Bookkeeper/infrastructure/file-media
+      dockerfile: filestash.Dockerfile
+    group_add: ["993"]
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
     restart: unless-stopped
     environment:
       # Filestash expects a hostname here; general.force_ssl selects HTTPS.
@@ -16,8 +22,9 @@ services:
     networks:
       proxy:
         aliases: [file-media-filestash]
-    cpus: 0.75
-    mem_limit: 768m
+    cpus: 1.5
+    cpu_shares: 256
+    mem_limit: 1536m
     pids_limit: 256
     logging:
       driver: json-file

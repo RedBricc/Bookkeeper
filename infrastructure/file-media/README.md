@@ -37,7 +37,8 @@ series metadata. Files have not been renamed or reorganized.
   It resolves backends dynamically so an unavailable media service cannot prevent
   the shared proxy from starting.
 - Jellyfin: 2 CPUs, 3 GiB RAM, 512 processes, UID/GID 1000, no capabilities.
-- Filestash: 0.75 CPU, 768 MiB RAM, 256 processes.
+- Filestash: 1.5 CPUs, 1.5 GiB RAM, 256 processes, CPU shares 256 (lower
+  priority under contention). Intel VA-API handles video encoding and scaling.
 - Container logs rotate at 10 MiB, three files each.
 - Jellyfin throttles ahead-of-playback transcoding and deletes old segments.
   Expensive chapter/trickplay generation and real-time filesystem monitoring are
@@ -72,6 +73,27 @@ to 360p, and QSV encode completed successfully. This verifies the hardware path;
 it does not guarantee real-time playback for every codec, subtitle, or resolution.
 
 Reference: https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/intel/
+
+### Filestash video acceleration
+
+Filestash is built from the pinned upstream image using `filestash.Dockerfile`.
+The derivative adds Debian trixie's `intel-media-va-driver-non-free` and `vainfo`,
+runs as the original unprivileged `filestash` user, and receives render group 993
+and `/dev/dri/renderD128`. No host driver packages are changed. Its persisted
+`features.video.encoder` is `h264_vaapi`; `configure-filestash.py` reapplies it.
+Restart Filestash after changing that setting because the streaming handler
+selects its encoder at startup.
+
+Build/deploy with `docker compose build filestash` followed by
+`docker compose up -d --no-deps filestash` in `/home/deploy/file-media`.
+The image base is pinned; rebuilding may pick up newer trixie driver packages.
+
+Verified through Filestash's own HLS endpoint: a roughly five-second 720p sample
+produced valid H.264/AAC output in 0.36 seconds. The plugin uses GPU encoding and
+scaling; decoding and audio processing can still use CPU. Filestash still copies
+the entire original file into its container video cache before streaming, so
+large files can retain an initial loading delay. This cache is cleared on restart
+and by the plugin's expiry timer. Jellyfin remains preferable for long movies.
 
 ## DNS and HTTPS
 

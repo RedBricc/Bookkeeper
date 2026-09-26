@@ -34,6 +34,8 @@ if __name__ == "__main__":
     HEADERS["Authorization"] = "Bearer " + session["access_token"]
     config = values(request("/admin/api/config"))
     config["general"].update(host="files.vallterra.wiki", force_ssl=True)
+    config.setdefault("features", {}).setdefault("video", {}).update(
+        enable_transcoder=True, encoder="h264_vaapi")
     label = "Home share"
     backend = {"type": "samba", "host": "host.docker.internal", "port": "445",
                "share": "home-share", "path": "/home-share/"}
