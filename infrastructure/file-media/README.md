@@ -81,6 +81,10 @@ The derivative adds Debian trixie's `intel-media-va-driver-non-free` and `vainfo
 runs as the original unprivileged `filestash` user, and receives render group 993
 and `/dev/dri/renderD128`. No host driver packages are changed. Its persisted
 `features.video.encoder` is `h264_vaapi`; `configure-filestash.py` reapplies it.
+When updating via the admin API, use `read_config()` from the configuration
+script: the private schema response omits `connections`. Posting it unchanged
+clears the connection allowlist and causes Forbidden errors for existing sessions.
+The script rejects configuration updates that omit the connection list.
 Restart Filestash after changing that setting because the streaming handler
 selects its encoder at startup.
 

@@ -10,6 +10,8 @@ HEADERS = {"Content-Type": "application/json", "Accept": "application/json",
 
 
 def request(path, data=None):
+    if path == "/admin/api/config" and data is not None and "connections" not in data:
+        raise ValueError("Full configuration updates must explicitly preserve connections")
     req = urllib.request.Request(
         BASE + path, headers=HEADERS,
         data=None if data is None else json.dumps(data).encode())
@@ -28,11 +30,19 @@ def values(schema):
     return schema
 
 
+def read_config():
+    # The private schema endpoint omits connections. A full POST without them
+    # silently clears the allowlist and breaks existing user sessions.
+    config = values(request("/admin/api/config"))
+    config["connections"] = request("/api/config")["connections"]
+    return config
+
+
 if __name__ == "__main__":
     credentials = json.loads(Path("/home/deploy/file-media/credentials.json").read_text())
     session = request("/admin/api/session", {"password": credentials["filestash_admin_password"]})
     HEADERS["Authorization"] = "Bearer " + session["access_token"]
-    config = values(request("/admin/api/config"))
+    config = read_config()
     config["general"].update(host="files.vallterra.wiki", force_ssl=True)
     config.setdefault("features", {}).setdefault("video", {}).update(
         enable_transcoder=True, encoder="h264_vaapi")
@@ -50,4 +60,5 @@ if __name__ == "__main__":
     public = request("/api/config")
     assert public["origin"] == "https://files.vallterra.wiki"
     assert public["auth"] == [label]
+    assert public["connections"] == config["connections"]
     print("Configured username/password login to the fixed Samba share.")
